@@ -11,7 +11,7 @@ class SimulationParameters {
     testingInterval = 3.0;
 
     /** Testing rate */
-    testingRate = 0.5;
+    testingRate = 0.6;
 
     /** False positive % (Float, 0-1) */
     falsePositiveRate = 0.01;
@@ -95,6 +95,9 @@ class Actor {
     /** By default actor has no protection */
     protection=ACTOR_PROTECTION.NONE
 
+    /** Days since rapid test */
+    testTime = null
+
     /** infect the individual. Starts as EXPOSED */
     infect() {
         this.infectedTime=0;
@@ -130,30 +133,9 @@ class Actor {
                 this.isolated=false
             }
         }
-    }
-    /***
-     * Models transmission from an infected individual to a suseptible
-     * individual.
-     * duration is in days (default is 15 minutes 0.0104)
-     * 
-     * TODO: model full viral load dynamics and exposure duration
-     */
-    hasBeenExposed(config,infected,duration=0.0104,
-        activity=ACTIVITY.NORMAL) {
-        if (infected.status != ACTOR_STATUS.INFECTIOUS
-            || this.status != ACTOR_STATUS.SUSCEPTIBLE) {
-            return false
+        if (this.testTime !== null ){
+            this.testTime+=1.0
         }
-        if (infected.isolated)
-            return false
-        if (Math.random()<config.transmissionRate
-            *infected.protection
-            *activity
-            *duration/0.0104) {
-            return true
-        }
-        return false
-
     }
 }
 
@@ -180,6 +162,7 @@ class Simulation {
         /* initial exposed subpopulation */
         for (var cnt=0;cnt<Math.max(1,this.config.startingInfectionRage*this.config.populationSize);cnt++){
             var idx=Math.floor(Math.random()*this.actors.length)
+            console.log("inital infection ",idx)
             this.actors[idx].infect();
         }
     }
@@ -188,7 +171,28 @@ class Simulation {
             return actor.status === status
           }).length     
     }
-
+    /***
+     * Models transmission from an infected individual to a suseptible
+     * individual.
+     * duration is in days (default is 15 minutes 0.0104)
+     * 
+     * TODO: model full viral load dynamics and exposure duration
+     */
+    hasBeenExposed(suseptible,infected,duration=0.0104,activity=ACTIVITY.NORMAL) {
+        if (infected.status != ACTOR_STATUS.INFECTIOUS
+            || suseptible.status != ACTOR_STATUS.SUSCEPTIBLE) {
+            return false
+        }
+        if (infected.isolated)
+            return false
+        if (Math.random()<this.config.transmissionRate
+            *infected.protection
+            *activity
+            *duration/0.0104) {
+            return true
+        }
+        return false
+    }
     /**
      * Perform rapid test on actor
      */
@@ -199,11 +203,13 @@ class Simulation {
                 && actor.infectedTime<this.config.daysToRecovery
                 && Math.random()>this.config.falseNegative){
                     console.log("tested positive",actor.id)
+                    actor.testTime=0
                     return true
             }
         }
         if( Math.random()<this.config.falsePositive) {
             console.log("False positive ",actor.id)
+            actor.testTime=0
             return true
         }
         return false
@@ -221,6 +227,8 @@ class Simulation {
     }
     /***
      * This is the outer tick. To be overriden by subclasses.
+     * Should implement policies such as social distancing,
+     * isolation or testing.
      * This base model just picks random actors to infect
      */
     tick() {
@@ -230,7 +238,8 @@ class Simulation {
                     // Pick a random nearby actor to expose
                     for (var encounter=0;encounter<this.config.numInteractions;encounter++){
                         var othera=this.actors[Math.floor(Math.random()*this.actors.length)]
-                        if(othera.hasBeenExposed(this.config,actor)) {
+                        if(this.hasBeenExposed(othera,actor)) {
+                            console.log(actor.id,"infects",othera.id)
                             othera.infect();   
                         }
                     }
@@ -238,7 +247,11 @@ class Simulation {
         } 
         /* perform rapid testing */
         for (var actor of this.actors) {
-            if(actor.isTesting && this.rapidTest(actor)) {
+            if(actor.isTesting 
+                && (actor.testTime===null ||
+                    actor.testTime>this.config.testingInterval)
+                && !this.isolated
+                && this.rapidTest(actor)) {
                 actor.isolateFor(14)
                 console.log("Isolated ",actor.id)
             }
