@@ -2,13 +2,16 @@
 class SimulationParameters {
 
     /** Starting Population size (Int) */
-    populationSize = 49;
+    populationSize = 1000;
 
     /** Starting infected rate (Float, 0-1) */
     startingInfectionRage = 0.004;
 
-    /** Frequency of testing: Start out with every 3 days (Float: 0-100.0) */
-    testingInterval = 0.333;
+    /** Testing interval: Start out with every 3 days (Float: 0-100.0) */
+    testingInterval = 3.0;
+
+    /** Testing rate */
+    testingRate = 0.5;
 
     /** False positive % (Float, 0-1) */
     falsePositiveRate = 0.01;
@@ -20,10 +23,10 @@ class SimulationParameters {
     positiveQuarantineRate = 0.5;
 
     /** Days to contagious (int) */
-    daysToContagious = 1.5;
+    daysToContagious = 2.5;
 
     /** Days to detectable (Float) */
-    daysToDetectable = 1.5;
+    daysToDetectable = 3.5;
 
     /** Days to Recovery */
     daysToRecovery = 14;
@@ -51,6 +54,23 @@ const ACTOR_STATUS = {
     DECEASED: 4
 };
 
+/** 
+ * activity is a risk modifier. 1.0 is normal, 0.0 is safe, >1.0 is risky
+*/
+const ACTIVITY = {
+    NORMAL: 1.0,
+    SAFE: 0.1,
+};
+
+/**
+ *   protection is 1.0 for no protection, 0 for full protection
+ * */
+const ACTOR_PROTECTION = {
+    NONE: 1.0,
+    MASK: 0.1,
+};
+
+
 class Actor {  
 
     /** Blue-healthy/Susceptible */
@@ -58,6 +78,7 @@ class Actor {
 
     /** Isolated/Not isolated (impacted by rapid testing) */
     isolated = false;
+    isolatedRemain=0; /* number of days of isolation remaining */
 
     /** The number of days this actor was infected. */
     infectedTime = null;
@@ -70,7 +91,72 @@ class Actor {
 
     /** ID number */
     id=0;
+
+    /** By default actor has no protection */
+    protection=ACTOR_PROTECTION.NONE
+
+    /** infect the individual. Starts as EXPOSED */
+    infect() {
+        this.infectedTime=0;
+        this.status=ACTOR_STATUS.EXPOSED
+    }
+
+    /** isolate actor for a number of days */
+    isolateFor(days){
+        this.isolated=true
+        this.isolatedRemain=days
+    }
+    
+    /** perform updates to actor for ticks */
+    tick(config){
+        if (this.status === ACTOR_STATUS.EXPOSED) {
+            if (this.infectedTime+Math.random()>config.daysToContagious) {
+                this.status=ACTOR_STATUS.INFECTIOUS;
+            }
+            this.infectedTime+=1.0;
+        } else if (this.status==ACTOR_STATUS.INFECTIOUS) {
+            if (this.infectedTime+Math.random()>config.daysToRecovery) {
+                if (Math.random()<config.mortalityRate) {
+                    this.status=ACTOR_STATUS.DECEASED;
+                } else {
+                    this.status=ACTOR_STATUS.RECOVERED;
+                }
+            }   
+            this.infectedTime+=1.0;           
+        }
+        if (this.isolated) {
+            this.isolatedRemain-=1.0
+            if (this.isolatedRemain<=0) {
+                this.isolated=false
+            }
+        }
+    }
+    /***
+     * Models transmission from an infected individual to a suseptible
+     * individual.
+     * duration is in days (default is 15 minutes 0.0104)
+     * 
+     * TODO: model full viral load dynamics and exposure duration
+     */
+    hasBeenExposed(config,infected,duration=0.0104,
+        activity=ACTIVITY.NORMAL) {
+        if (infected.status != ACTOR_STATUS.INFECTIOUS
+            || this.status != ACTOR_STATUS.SUSCEPTIBLE) {
+            return false
+        }
+        if (infected.isolated)
+            return false
+        if (Math.random()<config.transmissionRate
+            *infected.protection
+            *activity
+            *duration/0.0104) {
+            return true
+        }
+        return false
+
+    }
 }
+
 
 class Simulation {
 
@@ -88,18 +174,39 @@ class Simulation {
             a.xPosition=i%rows
             a.yPosition=Math.floor(i/rows)
             a.id=i;
+            a.isTesting = Math.random()<this.config.testingRate;
             this.actors.push(a)
         }
         /* initial exposed subpopulation */
         for (var cnt=0;cnt<Math.max(1,this.config.startingInfectionRage*this.config.populationSize);cnt++){
             var idx=Math.floor(Math.random()*this.actors.length)
-            this.actors[idx].status=ACTOR_STATUS.EXPOSED;
+            this.actors[idx].infect();
         }
     }
     countof(status) {
         return this.actors.filter(actor => {
             return actor.status === status
           }).length     
+    }
+
+    /**
+     * Perform rapid test on actor
+     */
+    rapidTest(actor) {
+        if (actor.status == ACTOR_STATUS.EXPOSED ||
+            actor.status == ACTOR_STATUS.INFECTIOUS) {
+            if ( actor.infectedTime>this.config.daysToDetectable
+                && actor.infectedTime<this.config.daysToRecovery
+                && Math.random()>this.config.falseNegative){
+                    console.log("tested positive",actor.id)
+                    return true
+            }
+        }
+        if( Math.random()<this.config.falsePositive) {
+            console.log("False positive ",actor.id)
+            return true
+        }
+        return false
     }
     /**
      * Handles the model tick except for exposure 
@@ -109,21 +216,7 @@ class Simulation {
         // This handles disease progression
         // TODO: cost model
         for (var actor of this.actors) {
-            if (actor.status === ACTOR_STATUS.EXPOSED) {
-                if (actor.infectedTime+Math.random()>this.config.daysToContagious) {
-                    actor.status=ACTOR_STATUS.INFECTIOUS;
-                }
-                actor.infectedTime++;
-            } else if (actor.status==ACTOR_STATUS.INFECTIOUS) {
-                if (actor.infectedTime+Math.random()>this.config.daysToRecovery) {
-                    if (Math.random()<this.config.mortalityRate) {
-                        actor.status=ACTOR_STATUS.DECEASED;
-                    } else {
-                        actor.status=ACTOR_STATUS.RECOVERED;
-                    }
-                }   
-                actor.infectedTime++;           
-            }
+            actor.tick(this.config)
         } 
     }
     /***
@@ -136,17 +229,20 @@ class Simulation {
                 ! actor.isolated) { 
                     // Pick a random nearby actor to expose
                     for (var encounter=0;encounter<this.config.numInteractions;encounter++){
-                        if(Math.random()<this.config.transmissionRate) {
-                            var othera=this.actors[Math.floor(Math.random()*this.actors.length)] 
-                            if(othera.status==ACTOR_STATUS.SUSCEPTIBLE) {
-                                othera.status=ACTOR_STATUS.EXPOSED;
-                                console.log(actor.id, " infects ",othera.id)
-                            }
+                        var othera=this.actors[Math.floor(Math.random()*this.actors.length)]
+                        if(othera.hasBeenExposed(this.config,actor)) {
+                            othera.infect();   
                         }
-
                     }
             } 
         } 
+        /* perform rapid testing */
+        for (var actor of this.actors) {
+            if(actor.isTesting && this.rapidTest(actor)) {
+                actor.isolateFor(14)
+                console.log("Isolated ",actor.id)
+            }
+        }
         this.tickDisease()
     }
 

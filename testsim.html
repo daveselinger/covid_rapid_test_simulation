@@ -9,7 +9,7 @@
     const simulation = new Simulation(parameters);
     let running = true;
 
-    for (t = 0; t < 1000; t++) {
+    for (t = 0; t < 500; t++) {
         simulation.tick();
         console.log(simulation.tickCnt,
             simulation.countof(ACTOR_STATUS.SUSCEPTIBLE),
