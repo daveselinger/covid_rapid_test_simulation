@@ -1,0 +1,17 @@
+.block {
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.block.sm {
+    width: 100%;
+    max-width: 720px;
+}
+
+.simulation {
+    display: block;
+    margin: 36px auto;
+    width: 800px;
+    height: 500px;
+    border: solid 1px #ccc;
+}

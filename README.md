@@ -1,1 +1,9 @@
-# covid_rapid_test_simulation
+# COVID Rapid Test Simulation
+
+## Quickstart
+
+
+## ToDo
+
+- [ ] Include chart library
+- [ ] 
