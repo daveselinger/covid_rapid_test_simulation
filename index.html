@@ -52,14 +52,35 @@
             <!-- Create a div where the graph will take place -->
             <canvas id="Simulation1Chart"></canvas>
         </div>
+        <div class="block">
+            <!-- Create a div where the graph will take place -->
+            <div id="Simulation2" class="simulation"></div>
+        </div>
     </div>
 </body>
-<script defer src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" type="text/javascript"></script>
-<script defer src="https://d3js.org/d3.v3.js" type="text/javascript"></script>
+
+<!-- External -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" type="text/javascript"></script>
+<script src="https://d3js.org/d3.v3.js" type="text/javascript"></script>
+<script src="https://unpkg.com/geometric@2/build/geometric.min.js"></script>
+
+<!-- Main COVID simulation -->
 <script src="./lib/simulation.js" type="text/javascript"></script>
+
+<!-- Visualizations -->
+<script src="./visuals/common.js" type="text/javascript"></script>
+<script src="./visuals/svgAnimation.js" type="text/javascript"></script>
+<script src="./visuals/canvasAnimation.js" type="text/javascript"></script>
 <script>
     window.onload = function () {
+        // Starts the first visualization
+        // const svg = Initialize('Simulation2');
+        // StartStopVisual();
+
+        // Starts canvas animation
+        startCanvasAnimation();
+
         // set the dimensions and margins of the graph
         let margin = { top: 10, right: 30, bottom: 30, left: 50 };
         let width  = 460 - margin.left - margin.right;
@@ -192,311 +213,6 @@
 
         console.log("End Simulation");
     };
-</script>
-
-<!-- Animated Balls -->
-<script>
-
-    /** An enum containing the color scheme for the visualization. */
-    const COLORS = {
-        BLUE:    '#1070CA',
-        TEAL:    '#14B5D0',
-        YELLOW:  '#F7D154',
-        ORANGE:  '#D9822B',
-        RED:     '#EC4C47',
-        GREEN:   '#47B881',
-        NEUTRAL: '#425A70',
-        DARK:    '#234361',
-        LIGHT:   '#E4E7EB',
-
-        // Neutral scale
-        N1:  '#F9F9FB',
-        N2:  '#F5F6F7',
-        N3:  '#EDF0F2',
-        N4:  '#E4E7EB',
-        N5:  '#C7CED4',
-        N6:  '#A6B1BB',
-        N7:  '#7B8B9A',
-        N8:  '#66788A',
-        N9:  '#425A70',
-        N10: '#234361'
-    };
-
-    /** Picks a random integer between `min` and `max`. */
-    const between = (min = 0, max = 10) => Math.floor(Math.random() * (max - min) + min);
-
-    window.onload = function() {
-        /**
-         * Ball object - multiple balls can be created by instantiating new objects
-         */
-        function Ball(svg, x, y, id, color, direction, radius) {
-            this.posX      = x; // cx
-            this.posY      = y; // cy
-            this.color     = color;
-            this.radius    = radius;
-            this.speed     = 1.5;
-            this.svg       = svg; // parent SVG
-            this.id        = id; // id of ball
-            this.direction = direction;
-            this.weight    = radius;
-
-            if (!this.direction) {
-                this.direction = Math.PI / 7;
-            }
-            if (!this.weight) {
-                this.weight = 10;
-            }
-            this.radius = this.weight;
-
-            this.data = [this.id]; // allow us to use d3.enter()
-
-            var self = this;
-
-            // **** direction is used only here -- earlier I was using to next move position.
-            // Now direction and speed together is velocity
-            this.vx = Math.cos(self.direction) * self.speed;
-            this.vy = Math.sin(self.direction) * self.speed;
-            this.initialVx   = this.vx;
-            this.initialVy   = this.vy;
-            this.initialPosX = this.posX;
-            this.initialPosY = this.posY;
-
-            // when speed changes, go to initial setting
-            this.GoToInitialSettings = function (newSpeed) {
-                self.posX = self.initialPosX;
-                self.posY = self.initialPosY;
-                self.vx = Math.cos(self.direction) * newSpeed;
-                self.vy = Math.sin(self.direction) * newSpeed;
-                self.Draw();
-            }
-
-            this.Draw = function () {
-                let svg = self.svg;
-                let ball = svg
-                    .selectAll('#' + self.id)
-                    .data(self.data);
-
-                ball.enter()
-                    .append("circle")
-                    .attr({"id" : self.id, 'class' : 'ball', 'r' : self.radius, 'weight' : self.weight})
-                    .style("fill", self.color);
-
-                ball.attr("cx", self.posX)
-                    .attr("cy", self.posY);
-
-                // Intersect ball is used to show collision effect - every ball has it's own intersect ball
-                let intersectBall = ball
-                    .enter()
-                    .append('circle')
-                    .attr({ 'id': self.id + '_intersect', 'class': 'intersectBall' });
-            }
-
-            this.Move = function () {
-                let svg = self.svg;
-
-                //self.posX += Math.cos(self.direction) * self.speed;
-                //self.posY += Math.sin(self.direction) * self.speed;
-
-                self.posX += self.vx;
-                self.posY += self.vy;
-
-                if (parseInt(svg.attr('width')) <= (self.posX + self.radius)) {
-                    self.posX = parseInt(svg.attr('width')) - self.radius - 1;
-                    self.direction = Math.PI - self.direction;
-                    self.vx = -self.vx;
-                }
-
-                if (self.posX < self.radius) {
-                    self.posX = self.radius+1;
-                    self.direction = Math.PI - self.direction;
-                    self.vx = -self.vx;
-                }
-
-                if (parseInt(svg.attr('height')) < (self.posY + self.radius)) {
-                    self.posY = parseInt(svg.attr('height')) - self.radius - 1;
-                    self.direction = 2 * Math.PI - self.direction;
-                    self.vy = -self.vy;
-                }
-
-                if (self.posY < self.radius) {
-                    self.posY = self.radius+1;
-                    self.direction = 2 * Math.PI - self.direction;
-                    self.vy = -self.vy;
-                }
-
-                // **** NOT USING direction except during initilization. Just left this for future reference ***** 
-                if (self.direction > 2 * Math.PI) {
-                    self.direction = self.direction - 2 * Math.PI;
-                }
-                if (self.direction < 0) {
-                    self.direction = 2 * Math.PI + self.direction;
-                }
-
-                self.Draw();
-            }
-        }
-
-        function CheckCollision(ball1, ball2) {
-            let absx = Math.abs(parseFloat(ball2.posX) - parseFloat(ball1.posX));
-            let absy = Math.abs(parseFloat(ball2.posY) - parseFloat(ball1.posY));
-
-            // Find distance between two balls.
-            let distance = Math.sqrt((absx * absx) + (absy * absy));
-            // Check if distance is less than sum of two radius - if yes, collision!
-            if (distance < (parseFloat(ball1.radius) + parseFloat(ball2.radius))) {
-                return true;
-            }
-            return false;
-        }
-
-        let balls = []; // global array representing balls
-        let color = 'blue'; // d3.scale.category20();
-
-        // courtsey thanks to several internet sites for formulas
-        // detect collision, find intersecting point and set new speed + direction for each ball based on weight (weight=radius).
-        function ProcessCollision(ball1, ball2) {
-            if (ball2 <= ball1) {
-                return;
-            }
-            if (ball1 >= (balls.length-1) || ball2 >= balls.length) {
-                return;
-            }
-
-            ball1 = balls[ball1];
-            ball2 = balls[ball2];
-
-            if (CheckCollision(ball1, ball2)) {
-                // Intersection point
-                let interx = ((ball1.posX * ball2.radius) + ball2.posX * ball1.radius)
-                    / (ball1.radius + ball2.radius);
-                let intery = ((ball1.posY * ball2.radius) + ball2.posY  * ball1.radius)
-                    / (ball1.radius + ball2.radius);
-
-                // Show collision effect for 500 miliseconds
-                let intersectBall = svg.select(`#${ball1.id}_intersect`);
-                intersectBall
-                    .attr({ 'cx': interx, 'cy': intery, 'r': 5, 'fill': COLORS.NEUTRAL })
-                    .transition()
-                    .duration(500)
-                    .attr('r', 0);
-
-                // Calculate new velocity of each ball.
-                let vx1 = (ball1.vx * (ball1.weight - ball2.weight)
-                    + (2 * ball2.weight * ball2.vx )) / (ball1.weight + ball2.weight);
-                let vy1 = (ball1.vy * (ball1.weight - ball2.weight)
-                    + (2 * ball2.weight * ball2.vy)) / (ball1.weight + ball2.weight);
-                let vx2 = (ball2.vx * (ball2.weight - ball1.weight)
-                    + (2 * ball1.weight * ball1.vx)) / (ball1.weight + ball2.weight);
-                let vy2 = (ball2.vy * (ball2.weight - ball1.weight)
-                    + (2 * ball1.weight * ball1.vy)) / (ball1.weight + ball2.weight);
-
-                // Set velocities for both balls
-                ball1.vx = vx1;
-                ball1.vy = vy1;
-                ball2.vx = vx2;
-                ball2.vy = vy2;
-
-                // Ensure one ball is not inside others. distant apart till not colliding
-                while (CheckCollision(ball1, ball2)) {
-                    ball1.posX += ball1.vx;
-                    ball1.posY += ball1.vy;
-
-                    ball2.posX += ball2.vx;
-                    ball2.posY += ball2.vy;
-                }
-                ball1.Draw();
-                ball2.Draw();
-            }
-        }
-
-        function Initialize(containerId) {
-            let height   = document.getElementById(containerId).clientHeight;
-            let width    = document.getElementById(containerId).clientWidth;
-            gContainerId = containerId;
-            gCanvasId    = containerId + '_canvas';
-            gTopGroupId  = containerId + '_topGroup';
-
-            let svg = d3
-                .select(`#${containerId}`)
-                .append("svg")
-                .attr("id", gCanvasId)
-                .attr("width", width)
-                .attr("height", height)
-                .append("g")
-                .attr("id", gTopGroupId)
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", width)
-                .attr("height", height)
-                .style("fill", "none");
-
-            for (let i = 0; i < 20; i++) {
-                balls.push(new Ball(
-                    svg,
-                    between(40, 550),
-                    between(40, 400),
-                    `n${i}`,
-                    COLORS.BLUE,
-                    Math.PI / Math.floor(Math.random() * 10),
-                    10
-                ));
-                // balls.push(new Ball(svg, 501, 101, `n${i}`, 'blue', Math.PI / Math.floor(Math.random() * 10), 15));
-                // balls.push(new Ball(svg, 51,  31,  'n2', 'blue', Math.PI / 3,           15));
-                // balls.push(new Ball(svg, 201, 201, 'n3', 'blue', Math.PI / 9,           15));
-                // balls.push(new Ball(svg, 91,  31,  'n4', 'blue', Math.PI / 2,           15));
-                // balls.push(new Ball(svg, 201, 21,  'n5', 'blue', Math.PI + Math.PI / 4, 15));
-                // balls.push(new Ball(svg, 401, 41,  'n6', 'blue', Math.PI + Math.PI / 7, 15));
-            }
-            // balls.push(new Ball(svg, 501, 101, 'n1', COLORS.BLUE, Math.PI / Math.floor(Math.random() * 10), 10));
-            // balls.push(new Ball(svg, 51,  31,  'n2', COLORS.BLUE, Math.PI / 3, 10));
-            // balls.push(new Ball(svg, 201, 201, 'n3', COLORS.BLUE, Math.PI / 9, 10));
-            // balls.push(new Ball(svg, 91,  31,  'n4', COLORS.BLUE, Math.PI / 2, 10));
-            // balls.push(new Ball(svg, 201, 21,  'n5', COLORS.BLUE, Math.PI + Math.PI / 4, 10));
-            // balls.push(new Ball(svg, 401, 41,  'n6', COLORS.BLUE, Math.PI + Math.PI / 7, 10));
-
-            for (let i = 0; i < balls.length; ++i) {
-                balls[i].Draw();
-            }
-            return svg;
-        }
-
-        let startStopFlag = null;
-
-        function StartStopGame() {
-            if (startStopFlag == null) {
-                d3.timer(function () {
-                    for (let i = 0; i < balls.length; ++i) {
-                        let r = balls[i].Move();
-                        for (let j = i + 1; j < balls.length; ++j) {
-                            ProcessCollision(i, j);
-                        }
-                    }
-                    if (startStopFlag == null) { return true; }
-                    else { return false; }
-                }, 500);
-                startStopFlag = 1;
-            } else {
-                startStopFlag = null;
-            }
-        }
-
-        // Handle ESC key
-        d3.select('body')
-            .on('keydown', function () {
-                if (balls.length == 0) {
-                    return;
-                }
-                console.log(d3.event);
-                // if ESC key - toggle start stop
-                if (d3.event.keyCode == 27) {
-                    StartStopGame();
-                }
-            });
-
-        const svg = Initialize('Simulation1');
-        StartStopGame();
-    };
-
 </script>
 
 </html>
