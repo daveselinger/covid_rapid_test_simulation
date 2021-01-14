@@ -98,6 +98,12 @@ class Actor {
     /** Days since rapid test */
     testTime = null
 
+    /** Days isolated  */
+    daysIsolated = 0
+
+    /** number of test conducted */
+    testsConducted =0 
+
     /** infect the individual. Starts as EXPOSED */
     infect() {
         this.infectedTime=0;
@@ -109,6 +115,7 @@ class Actor {
         this.isolated=true
         this.isolatedRemain=days
     }
+
     
     /** perform updates to actor for ticks */
     tick(config){
@@ -129,6 +136,7 @@ class Actor {
         }
         if (this.isolated) {
             this.isolatedRemain-=1.0
+            this.daysIsolated++
             if (this.isolatedRemain<=0) {
                 this.isolated=false
             }
@@ -171,6 +179,18 @@ class Simulation {
             return actor.status === status
           }).length     
     }
+    /*** 
+     * Return total tests conducted and days isolated for cost calc
+     */
+    stats(){
+        var totTests=0//this.reduce((a, b) => a + (b.testsConducted || 0), 0)
+        var totIsolated=0
+        for (var actor of this.actors) {
+            totTests+=actor.testsConducted
+            totIsolated+=actor.daysIsolated
+        } 
+        return {numTests:totTests,daysLost:totIsolated}
+    }
     /***
      * Models transmission from an infected individual to a suseptible
      * individual.
@@ -197,6 +217,7 @@ class Simulation {
      * Perform rapid test on actor
      */
     rapidTest(actor) {
+        actor.testsConducted++
         if (actor.status == ACTOR_STATUS.EXPOSED ||
             actor.status == ACTOR_STATUS.INFECTIOUS) {
             if ( actor.infectedTime>this.config.daysToDetectable

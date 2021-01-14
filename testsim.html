@@ -10,11 +10,13 @@
 
     for (t = 0; t < 500; t++) {
         simulation.tick();
+        stats=simulation.stats()
         console.log(simulation.tickCnt,
             simulation.countof(ACTOR_STATUS.SUSCEPTIBLE),
             simulation.countof(ACTOR_STATUS.INFECTIOUS),
             simulation.countof(ACTOR_STATUS.RECOVERED),
             simulation.countof(ACTOR_STATUS.DECEASED),
+            stats.numTests,stats.daysLost
         )
         //simulation.update();
     }
