@@ -15,3 +15,22 @@
     height: 500px;
     border: solid 1px #ccc;
 }
+
+.number {
+    font-family: monospace;
+    font-size: 1.4rem;
+    line-height: 1.5rem;
+}
+
+dt {
+    float: left;
+    clear: left;
+    width: 100px;
+    text-align: right;
+}
+dt::after {
+    content: ":";
+}
+dd {
+    margin: 0 0 0 110px;
+}

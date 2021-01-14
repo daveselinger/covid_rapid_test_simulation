@@ -25,5 +25,16 @@ const COLORS = {
 
 const COUNT = 20;
 
-/** Picks a random integer between `min` and `max`. */
+
+/**
+ * A helper utility to add a delay to the execution.
+ * @param {number} ms - The number of milliseconds to pause.
+ */
+const pause = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Picks a random integer between `min` and `max`.
+ * @param {number} min - The minimum value (inclusive).
+ * @param {number} max - The maximum value (inclusive).
+ */
 const between = (min = 0, max = 10) => Math.floor(Math.random() * (max - min) + min);

@@ -44,16 +44,22 @@
             <h1>Simulation testing.</h1>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
         </div>
-        <div class="block">
-            <!-- <canvas id="Simulation1" class="simulation"></canvas> -->
-            <div id="Simulation1" class="simulation"></div>
+        <div id="Simulation1">
+            <div class="block sm">
+                <dl>
+                    <dt>Infected</dt><dd class="infected number"></dd>
+                    <dt>Recovered</dt><dd class="recovered number"></dd>
+                    <dt>Deceased</dt><dd class="deceased number"></dd>
+                </dl>
+            </div>
+            <div class="block">
+                <div id="Simulation1-Graphic" class="simulation"></div>
+            </div>
         </div>
         <div class="block">
-            <!-- Create a div where the graph will take place -->
             <canvas id="Simulation1Chart"></canvas>
         </div>
         <div class="block">
-            <!-- Create a div where the graph will take place -->
             <div id="Simulation2" class="simulation"></div>
         </div>
     </div>
@@ -79,139 +85,45 @@
         // StartStopVisual();
 
         // Starts canvas animation
-        startCanvasAnimation();
+        makeCanvasAnimation('Simulation1-Graphic');
 
-        // set the dimensions and margins of the graph
-        let margin = { top: 10, right: 30, bottom: 30, left: 50 };
-        let width  = 460 - margin.left - margin.right;
-        let height = 400 - margin.top - margin.bottom;
-        
-        // Add SVG element
-        // const Chart = d3.select('#Simulation1Chart')
-        //     .append('svg')
-        //     .attr('width', width + margin.left + margin.right)
-        //     .attr('height', height + margin.top + margin.bottom)
-        //     .append('g')
-        //     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-        
-        // Process data events...
-        // d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv",
-        
-        //     // When reading the csv, I must format variables:
-        //     function (d){
-        //         return { date : d3.timeParse("%Y-%m-%d")(d.date), value : d.value }
-        //     },
-        
-        // });
+        const Sim1Stats = {
+            infected:  $("#Simulation1 .infected")[0],
+            recovered: $("#Simulation1 .recovered")[0],
+            deceased:  $("#Simulation1 .deceased")[0]
+        };
 
-        // new Chart('Simulation1Chart', {
-        //     type: 'line',
-        //     data: {
-        //         // labels: generateLabels(),
-        //         datasets: [{
-        //             backgroundColor: '#ddd', // utils.transparentize(presets.red),
-        //             borderColor: '#ccc', // presets.red,
-        //             data: [ 100, 110, 112], // generateData(),
-        //             label: 'Dataset',
-        //             fill: true
-        //         }],
-        //         // labels: ['January', 'February', 'March', 'April']
-        //     },
-        //     options: {
-        //         maintainAspectRatio: false,
-        //         spanGaps: false,
-        //         elements: {
-        //             line: {
-        //                 tension: 0.000001
-        //             }
-        //         },
-        //         plugins: {
-        //             filler: {
-        //                 propagate: false
-        //             },
-        //             title: {
-        //                 // text: 'fill: ' + boundary,
-        //                 display: true
-        //             }
-        //         },
-        //         scales: {
-        //             yAxes: [{
-        //                 ticks: {
-        //                     suggestedMin: 0,
-        //                     suggestedMax: 100
-        //                 }
-        //             }],
-        //             xAxes: [{
-        //                 ticks: {
-        //                     max: 1000,
-        //                     min: 0,
-        //                     stepSize: 10
-        //                 }
-        //             }]
-        //         }
-        //         // scales: {
-        //         //     x: {
-        //         //         ticks: {
-        //         //             autoSkip: false,
-        //         //             maxRotation: 0
-        //         //         }
-        //         //     }
-        //         // }
-        //     }
-        // });
-
-        // Add X axis --> it is a date format
-        // let x = d3.scaleTime()
-        //     .domain(d3.extent(data, function(d) { return d.date; }))
-        //     .range([ 0, 100 ]);
-        
-        // svg.append("g")
-        //     .attr("transform", "translate(0," + height + ")")
-        //     .call(d3.axisBottom(x));
-    
-        // // Add Y axis
-        // let y = d3.scaleLinear()
-        //     .domain([0, d3.max(data, function(d) { return +d.value; })])
-        //     .range([ height, 0 ]);
-        // svg.append("g")
-        //     .call(d3.axisLeft(y));
-
-        // Now I can use this dataset:
-        function processDataPoint(current) { 
+        async function processDataPoint(current) {
             console.log("Count: ", current.tickCnt, " -- ",
-                current.countof(ACTOR_STATUS.SUSCEPTIBLE),
-                current.countof(ACTOR_STATUS.INFECTIOUS),
-                current.countof(ACTOR_STATUS.RECOVERED),
-                current.countof(ACTOR_STATUS.DECEASED),
-            );       
-            // Add the area
-            // svg.append("path")
-            //     .datum(data)
-            //     .attr("fill", "#cce5df")
-            //     .attr("stroke", "#69b3a2")
-            //     .attr("stroke-width", 1.5)
-            //     .attr("d", d3.area()
-            //         .x(function(d) { return x(d.date) })
-            //         .y0(y(0))
-            //         .y1(function(d) { return y(d.value) })
-            //     );
-
-            // Update Charts.js chart
-            // myChart.update({ duration: 0 });
+                current.totals.susceptible,
+                current.totals.infected,
+                current.totals.recovered,
+                current.totals.deceased
+            );
+            
+            // Update chart output
+            Sim1Stats.infected.innerHTML = current.totals.infected;
+            Sim1Stats.recovered.innerHTML = current.totals.recovered;
+            Sim1Stats.deceased.innerHTML = current.totals.deceased;
         }
 
-        console.log('Starting simulation...');
-        const parameters = new SimulationParameters();
-        console.log('Population size:', parameters.populationSize);
-        const simulation = new Simulation(parameters);
+        async function runSimulation1() {
+            console.log('Starting simulation 1...');
+            const parameters = new SimulationParameters();
+            console.log('Population size:', parameters.populationSize);
+            const simulation = new Simulation(parameters);
 
-        for (let t = 0; t < 1000; t++) {
-            simulation.tick();
-            processDataPoint(simulation);
-            // simulation.update();
+            for (let t = 0; t < 1000; t++) {
+                simulation.tick();
+                processDataPoint(simulation);
+                // await pause(50);
+            }
+
+            console.log("End simulation 1", simulation);
         }
 
-        console.log("End Simulation");
+        runSimulation1();
+
     };
 </script>
 

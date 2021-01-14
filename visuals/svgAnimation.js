@@ -3,6 +3,7 @@
  * Ball object - multiple balls can be created by instantiating new objects
  */
 function Ball(svg, x, y, id, color, direction, radius) {
+
     this.setup = { svg, x, y, id, color, direction, radius };
     this.posX      = x;
     this.posY      = y;
@@ -101,6 +102,7 @@ function Ball(svg, x, y, id, color, direction, radius) {
 
         self.Draw();
     }
+
 }
 
 /**
@@ -238,15 +240,3 @@ function StartStopVisual() {
         running = false;
     }
 }
-
-// Handle ESC key
-d3.select('body')
-    .on('keydown', function () {
-        if (balls.length == 0) {
-            return;
-        }
-        // If ESC key - toggle start/stop
-        if (d3.event.keyCode == 27) {
-            StartStopVisual();
-        }
-    });
