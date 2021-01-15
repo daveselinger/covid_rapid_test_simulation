@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html>
 <script src="./lib/simulation.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.bundle.min.js"></script>
+<script src="./linechart.js"></script>
+<div style="width: 100%; height: 100%">
+    <canvas id="line_chart"></canvas>
+</div>
+  
+
 <script>
     console.log("Start")
     const parameters = new SimulationParameters();
@@ -8,8 +15,15 @@
     const simulation = new Simulation(parameters);
     let running = true;
 
+    //Initialize chart
+    var ctx = document.getElementById("line_chart").getContext("2d");
+
+    chart_config = initChart(500);
+    var lineChart = new Chart(ctx, chart_config);
+
     for (t = 0; t < 500; t++) {
         simulation.tick();
+
         console.log(simulation.tickCnt,
             simulation.totals.susceptible,
             simulation.totals.infected,
@@ -19,6 +33,15 @@
             simulation.totals.daysLost,
         )
         //simulation.update();
+
+        setDayData(chart_config, t,    
+            simulation.totals.deceased/simulation.config.populationSize * 100.0,
+            simulation.totals.infected/simulation.config.populationSize * 100.0,
+            simulation.totals.recovered/simulation.config.populationSize * 100.0,
+            simulation.totals.susceptible/simulation.config.populationSize * 100.0,
+            );
+        
+            lineChart.update();
     }
 
     console.log("End")
