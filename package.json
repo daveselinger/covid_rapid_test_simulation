@@ -1,0 +1,19 @@
+{
+  "name": "covid_rapid_test_simulation",
+  "version": "1.0.0",
+  "description": "A simulation and visualization of rapid at-home testing for COVID.",
+  "main": "main.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daveselinger/covid_rapid_test_simulation.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/daveselinger/covid_rapid_test_simulation/issues"
+  },
+  "homepage": "https://github.com/daveselinger/covid_rapid_test_simulation#readme"
+}
