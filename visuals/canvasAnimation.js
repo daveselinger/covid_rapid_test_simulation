@@ -1,13 +1,23 @@
+// Load images
+const blueGuy = new Image();
+blueGuy.src = './images/blue_xs.png';
+blueGuy.width = 10;
+
+const redGuy = new Image();
+redGuy.src = './images/red_small.png';
+redGuy.width = 10;
 
 class CanvasSimulation {
 
-    constructor(canvas, opts){
+    constructor(canvas, opts, simulation){
         this.canvas = canvas;
-        this.ctx    = canvas.getContext('2d');
+        this.ctx    = canvas.getContext('2d', { alpha: false });
         this.width  = opts && opts.width ? opts.width : 600;
         this.height = opts && opts.height ? opts.height : 400;
         this.center = [this.width / 2, this.height / 2];
         this.atoms  = [];
+
+        this.imageType = 0;
 
         // Ensure methods are bound
         this.runCanvasAnimation = this.runCanvasAnimation.bind(this);
@@ -19,7 +29,7 @@ class CanvasSimulation {
         d.radius = d.radius || 5;
         d.angle  = d.angle || 0;
         d.speed  = d.speed || 1;
-        
+
         this.atoms.push(d);
         
         return this;
@@ -94,11 +104,17 @@ class CanvasSimulation {
 
         // The simulation.tick method advances the simulation one tick
         this.tick();
+
+        // Re-draw all the actors
         for (let i = 0, l = this.atoms.length; i < l; i++){
             const d = this.atoms[i];
-            this.ctx.beginPath();
-            this.ctx.arc(...d.pos, d.radius, 0, 2 * Math.PI);
-            this.ctx.fill();   
+            if (this.imageType === 0) {
+                this.ctx.beginPath();
+                this.ctx.arc(...d.pos, d.radius, 0, 2 * Math.PI);
+                this.ctx.fill();
+            } else {
+                this.ctx.drawImage(blueGuy, ...d.pos, 20, 27);
+            }
         }
     }
 
@@ -107,32 +123,33 @@ class CanvasSimulation {
 /**
  * Returns a new instance of CanvasSimulation.
  * @param {*} canvas - A canvas DOM node which will render the data.
+ * @param {Object} simulation - A canvas DOM node which will render the data.
  * @param {*} [options] - Initialization options.
  */
-const simulationFactory = (canvas, options) => {
-    const simulation = new CanvasSimulation(canvas, options);
+const simulationFactory = (canvas, simulation, options) => {
+    const visualization = new CanvasSimulation(canvas, simulation, options);
 
     // Style the canvas
-    canvas.width = simulation.width;
-    canvas.height = simulation.height;
+    canvas.width = visualization.width;
+    canvas.height = visualization.height;
     canvas.style.background = "white";
 
     for (let i = 0; i < 200; i++){
         const radius = 5;
-        
+
         // Add actor
-        simulation.add({
+        visualization.add({
             speed: between(1, 3),
             angle: between(0, 360),
             pos: [
-                between(radius, simulation.width - radius),
-                between(radius, simulation.height - radius)
+                between(radius, visualization.width - radius),
+                between(radius, visualization.height - radius)
             ],
             radius
         });
     }
 
-    return simulation;
+    return visualization;
 };
 
 function makeCanvasAnimation(elementId) {
