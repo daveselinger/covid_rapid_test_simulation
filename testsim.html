@@ -7,10 +7,12 @@
     <canvas id="line_chart"></canvas>
 </div>
 <div>
-   Population <input id=population_size type=text name=population_size value=10000 />
-   Initial Infected Pct <input type=text name=initial_infected value=0.5 />
-   Testing interval (in days) <input type=text name=testing_interval_days value=3 />
-   Percent of population testing <input id=test_percent type=text name=test_percent value=50 />
+   Population <input id=population_size type=text value=10000 />
+   Initial Infected Pct <input type=text id=initial_infected value=0.5 />
+
+   Test Parameters <br />
+   Testing interval (in days) <input type=text id=testing_interval_days value=3 />
+   Percent of population testing <input type=text id=testing_rate value=50 />
    <button id="run_simulation">Run Simulation</button>
 </div>
 
@@ -23,7 +25,21 @@
     document.getElementById('run_simulation').addEventListener('click', function() {
         var parameters = new SimulationParameters();
         parameters.populationSize = parseInt(document.getElementById('population_size').value);
+        parameters.startingInfectionRate = parseFloat(document.getElementById('initial_infected').value);
+        parameters.testingInterval = parseFloat(document.getElementById('testing_interval_days').value);
+        parameters.testingRate = parseFloat(document.getElementById('testing_rate').value);
+
         console.log(parameters.populationSize);
+        console.log(parameters.startingInfectionRate);
+        console.log(parameters.testingInterval);
+        console.log(parameters.testingRate);
+        console.log(parameters.populationSize);
+        console.log(parameters.populationSize);
+        console.log(parameters.populationSize);
+        console.log(parameters.populationSize);
+        console.log(parameters.populationSize);
+        console.log(parameters.populationSize);
+
     });
 
     function runSimulation(parameters) {
