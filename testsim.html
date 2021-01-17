@@ -7,12 +7,27 @@
     <canvas id="line_chart"></canvas>
 </div>
 <div>
-   Population <input id=population_size type=text value=10000 />
-   Initial Infected Pct <input type=text id=initial_infected value=0.5 />
+   Starting parameters <br/>
+   Population <input id=population_size type=text value=10000 /><br/>
+   Initial Infected Pct <input type=text id=initial_infected value=0.5 /><br/>
+   Self-isolating symptomatic (with or without test) <input type=text id=self_isolation_rate value=0.1><br />
+   Self-isolating days  <input type=text id=positive_test_isolation_interval value=14><br />
+   Daily interactions (avg) <input type=text id=num_interactions value=3.0><br />
+   Daily interactions (STD) <input type=text id=num_interactions_std value=0.02><br />
 
-   Test Parameters <br />
-   Testing interval (in days) <input type=text id=testing_interval_days value=3 />
-   Percent of population testing <input type=text id=testing_rate value=50 />
+   Rapid Testing Parameters <br />
+   Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
+   Percent of population testing <input type=text id=testing_rate value=50 /><br/>
+   False Positive percent <input type=text id=false_positive value=0.01 /><br/>
+   False Negative percent <input type=text id=false_negative value=0.02 /><br/>
+
+   Disease Parameters <br />
+   Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
+   Percent of population testing <input type=text id=testing_rate value=50 /><br/>
+   False Positive percent <input type=text id=false_positive value=0.01 /><br/>
+   False Negative percent <input type=text id=false_negative value=0.02 /><br/>
+
+
    <button id="run_simulation">Run Simulation</button>
 </div>
 
@@ -24,10 +39,27 @@
 
     document.getElementById('run_simulation').addEventListener('click', function() {
         var parameters = new SimulationParameters();
+        // Population Parameters
         parameters.populationSize = parseInt(document.getElementById('population_size').value);
         parameters.startingInfectionRate = parseFloat(document.getElementById('initial_infected').value);
+        parameters.positiveTestIsolationInterval = parseFloat(document.getElementById('positive_test_isolation_interval').value);
+        parameters.numInteractions = parseFloat(document.getElementById('num_interactions').value);
+        parameters.numInteractionsSTD = parseFloat(document.getElementById('num_interactions_std').value);
+
+        // Testing Parameters
         parameters.testingInterval = parseFloat(document.getElementById('testing_interval_days').value);
         parameters.testingRate = parseFloat(document.getElementById('testing_rate').value);
+        parameters.falsePositiveRate = parseFloat(document.getElementById('false_positive').value);
+        parameters.falseNegative = parseFloat(document.getElementById('false_negative').value);
+
+        // Disease Parameters
+        parameters.daysToContagious = parseFloat(document.getElementById('days_to_contagious').value);
+        parameters.daysToDetectable = parseFloat(document.getElementById('days_to_detectable').value);
+        parameters.daysToSymptoms = parseFloat(document.getElementById('days_to_symptoms').value);
+        parameters.daysToRecovery = parseFloat(document.getElementById('days_to_recovery').value);
+        parameters.mortalityRate = parseFloat(document.getElementById('mortality_rate').value);
+        parameters.asymptomaticRate = parseFloat(document.getElementById('asymptomatic_rate').value);
+        parameters.recoveredResistance = parseFloat(document.getElementById('recovered_resistance').value);
 
         console.log(parameters.populationSize);
         console.log(parameters.startingInfectionRate);
