@@ -22,10 +22,13 @@
    False Negative percent <input type=text id=false_negative value=0.02 /><br/>
 
    Disease Parameters <br />
-   Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
-   Percent of population testing <input type=text id=testing_rate value=50 /><br/>
-   False Positive percent <input type=text id=false_positive value=0.01 /><br/>
-   False Negative percent <input type=text id=false_negative value=0.02 /><br/>
+   Days to Contagious <input type=text id=days_to_contagious value=3 /><br/>
+   Days to Detectable <input type=text id=days_to_detectable value=3.5 /><br/>
+   Days to Symptoms <input type=text id=days_to_symptoms value=5.5 /><br/>
+   Days to Recovery <input type=text id=days_to_recovery value=14.0 /><br/>
+   Mortality Rate <input type=text id=mortality_rate value=0.01 /><br/>
+   Asymptomatic Rate <input type=text id=asymptomatic_rate value=0.2 /><br/>
+   Recovered Resistance <input type=text id=recovered_resistance value=0.98 /><br/>
 
 
    <button id="run_simulation">Run Simulation</button>
@@ -50,7 +53,7 @@
         parameters.testingInterval = parseFloat(document.getElementById('testing_interval_days').value);
         parameters.testingRate = parseFloat(document.getElementById('testing_rate').value);
         parameters.falsePositiveRate = parseFloat(document.getElementById('false_positive').value);
-        parameters.falseNegative = parseFloat(document.getElementById('false_negative').value);
+        parameters.falseNegative = parseFloat("0.02");
 
         // Disease Parameters
         parameters.daysToContagious = parseFloat(document.getElementById('days_to_contagious').value);
@@ -72,6 +75,7 @@
         console.log(parameters.populationSize);
         console.log(parameters.populationSize);
 
+        runSimulation(parameters);
     });
 
     function runSimulation(parameters) {
