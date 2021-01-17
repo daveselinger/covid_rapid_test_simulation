@@ -9,6 +9,7 @@ const COLORS = {
     NEUTRAL: '#425A70',
     DARK:    '#234361',
     LIGHT:   '#E4E7EB',
+    XLIGHT:  '#F5F6F7',
 
     // Neutral scale
     N1:  '#F9F9FB',

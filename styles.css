@@ -5,14 +5,14 @@
 
 .block.sm {
     width: 100%;
-    max-width: 720px;
+    max-width: 800px;
 }
 
 .simulation {
     display: block;
     margin: 36px auto;
-    width: 800px;
-    height: 500px;
+    width: 1000px;
+    height: 540px;
     border: solid 1px #ccc;
 }
 
@@ -22,6 +22,10 @@
     line-height: 1.5rem;
 }
 
+
+dl {
+    min-height: 20px;
+}
 dt {
     float: left;
     clear: left;
@@ -33,4 +37,16 @@ dt::after {
 }
 dd {
     margin: 0 0 0 110px;
+}
+
+.btn .i { font-size: .8rem; }
+
+
+/* FOOTER */
+
+footer {
+    display: block;
+    width: auto;
+    padding: 15px;
+    border-top: solid 1px #E4E7EB;
 }
