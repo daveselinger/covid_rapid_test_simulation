@@ -7,6 +7,10 @@ const redGuy = new Image();
 redGuy.src = './images/red_sm.png';
 redGuy.width = 10;
 
+/**
+ * This class runs a visual simulation connected to the COVID simulation model, and renders
+ * the output to the canvas DOM element passed in.
+ */
 class CanvasSimulation {
 
     /** Whether or not this visualization has started. */
@@ -64,24 +68,29 @@ class CanvasSimulation {
     }
     
     tick(){
-        for (let i = 0; i < this.atoms.length; i++){
+        const numberOfAtoms = this.atoms.length;
+        for (let i = 0; i < numberOfAtoms; i++){
             const atom = this.atoms[i];
             atom.collided = false;
 
             // Check through other nodes to detect collisions
-            for (let j = 0; j < this.atoms.length; j++){
+            for (let j = 0; j < numberOfAtoms; j++){
                 const atom0 = this.atoms[j];
                 atom0.collided = false;
 
                 // Collision!
-                if (i !== j && geometric.lineLength([atom.pos, atom0.pos]) < atom.radius + atom0.radius && !atom.collided && !atom0.collided){
+                if (i !== j
+                    && geometric.lineLength([atom.pos, atom0.pos]) < atom.radius + atom0.radius
+                    && !atom.collided
+                    && !atom0.collided
+                ) {
 
                     // TODO: Call interaction method in simulation
 
 
                     // To avoid having them stick to each other,
                     // test if moving them in each other's angles will bring them closer or farther apart
-                    // NOTE: Is this slow and unnecessary?
+                    // NOTE: Is this slow and unnecessary? Can we use a simpler function to handle "bounce"?
                     const keep = geometric.lineLength([
                         geometric.pointTranslate(atom.pos, atom.angle, atom.speed),
                         geometric.pointTranslate(atom0.pos, atom0.angle, atom0.speed)
@@ -132,6 +141,9 @@ class CanvasSimulation {
             }
         }
 
+        // this.simulation.tickInteractions();
+        // this.simulation.tickRapidTesting();
+        // this.simulation.tickDisease();
         this.simulation.tick();
     }
 
@@ -212,10 +224,11 @@ class CanvasSimulation {
 }
 
 /**
- * Returns a new instance of CanvasSimulation.
+ * Creates a new instance of CanvasSimulation and sets up tha canvas.
  * @param {*} canvas - A canvas DOM node which will render the data.
  * @param {Object} simulation - A canvas DOM node which will render the data.
  * @param {*} [options] - Initialization options.
+ * @returns A new instance of `CanvasSimulation`.
  */
 const simulationFactory = (canvas, simulation, options) => {
     const visualization = new CanvasSimulation(
@@ -241,6 +254,7 @@ const simulationFactory = (canvas, simulation, options) => {
  * @param {string} elementId - The ID of the wrapper element for this animation.
  * @param {Object} [simulationOptions] - An object containing a subset of simulation options.
  * @param {Object} [visualOptions] - An object containing visualization options.
+ * @returns A reference to the `CanvasSimulation` instance created.
  */
 function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = {}) {
     const wrapper = document.getElementById(elementId);
@@ -268,5 +282,7 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
         );
         mySimulation.start();
     });
+
+    return mySimulation;
     
 }
