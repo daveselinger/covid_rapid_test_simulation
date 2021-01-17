@@ -6,47 +6,62 @@
 <div style="width: 100%; height: 100%">
     <canvas id="line_chart"></canvas>
 </div>
-  
+<div>
+   Population <input id=population_size type=text name=population_size value=10000 />
+   Initial Infected Pct <input type=text name=initial_infected value=0.5 />
+   Testing interval (in days) <input type=text name=testing_interval_days value=3 />
+   Percent of population testing <input id=test_percent type=text name=test_percent value=50 />
+   <button id="run_simulation">Run Simulation</button>
+</div>
 
 <script>
-    console.log("Start")
-    const parameters = new SimulationParameters();
-    console.log(parameters.populationSize);
-    const simulation = new Simulation(parameters);
-    let running = true;
-
-    //Initialize chart
-    var ctx = document.getElementById("line_chart").getContext("2d");
-
-    chart_config = initChart(500);
-    var lineChart = new Chart(ctx, chart_config);
-
-    for (t = 0; t < 500; t++) {
-        simulation.tick();
-
-        console.log(simulation.tickCnt,
-            simulation.totals.susceptible,
-            simulation.totals.infected,
-            simulation.totals.recovered,
-            simulation.totals.deceased,
-            simulation.totals.testsConducted,
-            simulation.totals.daysLost,
-        )
-        //simulation.update();
-
-        setDayData(chart_config, t,    
-            simulation.totals.deceased/simulation.config.populationSize * 100.0,
-            simulation.totals.infected/simulation.config.populationSize * 100.0,
-            simulation.totals.recovered/simulation.config.populationSize * 100.0,
-            simulation.totals.susceptible/simulation.config.populationSize * 100.0,
-            );
-        
-            lineChart.update();
+    function donothing() {
     }
 
-    console.log("End")
+    console.log("Start");
+
+    document.getElementById('run_simulation').addEventListener('click', function() {
+        var parameters = new SimulationParameters();
+        parameters.populationSize = parseInt(document.getElementById('population_size').value);
+        console.log(parameters.populationSize);
+    });
+
+    function runSimulation(parameters) {
+        var simulation = new Simulation(parameters);
+        let running = true;
+
+        //Initialize chart
+        var ctx = document.getElementById("line_chart").getContext("2d");
+
+        chart_config = initChart(500);
+        var lineChart = new Chart(ctx, chart_config);
+
+        for (t = 0; t < 500; t++) {
+            simulation.tick();
+
+            console.log(simulation.tickCnt,
+                simulation.totals.susceptible,
+                simulation.totals.infected,
+                simulation.totals.recovered,
+                simulation.totals.deceased,
+                simulation.totals.testsConducted,
+                simulation.totals.daysLost,
+            )
+            //simulation.update();
+
+            setDayData(chart_config, t,    
+                simulation.totals.deceased/simulation.config.populationSize * 100.0,
+                simulation.totals.infected/simulation.config.populationSize * 100.0,
+                simulation.totals.recovered/simulation.config.populationSize * 100.0,
+                simulation.totals.susceptible/simulation.config.populationSize * 100.0,
+                );
+            
+                lineChart.update();
+        }
+
+        console.log("End");
+    }
 </script>
-Simulation testing.
 </html>
 
   
