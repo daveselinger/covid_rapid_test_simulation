@@ -98,6 +98,35 @@
     setupForm('boop');
     setupForm('boop_badoop');
 
+    function tickSimulation (t, chart_config, simulation, lineChart) {
+        if (t==500) {
+            console.log("End");
+        }
+
+        simulation.tick();
+
+        console.log(simulation.tickCnt,
+            simulation.totals.susceptible,
+            simulation.totals.infected,
+            simulation.totals.recovered,
+            simulation.totals.deceased,
+            simulation.totals.testsConducted,
+            simulation.totals.daysLost,
+        )
+        //simulation.update();
+
+        setDayData(chart_config, t,    
+            simulation.totals.deceased/simulation.config.populationSize * 100.0,
+            simulation.totals.infected/simulation.config.populationSize * 100.0,
+            simulation.totals.recovered/simulation.config.populationSize * 100.0,
+            simulation.totals.susceptible/simulation.config.populationSize * 100.0,
+            );
+        
+        lineChart.update();
+        lineChart.render();
+        setTimeout(() => { tickSimulation(t+1, chart_config, simulation, lineChart) }, 200);
+    }
+
     function runSimulation(line_chart_element, parameters) {
         var simulation = new Simulation(parameters);
         let running = true;
@@ -105,33 +134,11 @@
         //Initialize chart
         var ctx = line_chart_element.getContext("2d");
 
-        chart_config = initChart(500);
+        var chart_config = initChart(500);
         var lineChart = new Chart(ctx, chart_config);
+        lineChart.options.animation = false; 
 
-        for (t = 0; t < 500; t++) {
-            simulation.tick();
-
-            console.log(simulation.tickCnt,
-                simulation.totals.susceptible,
-                simulation.totals.infected,
-                simulation.totals.recovered,
-                simulation.totals.deceased,
-                simulation.totals.testsConducted,
-                simulation.totals.daysLost,
-            )
-            //simulation.update();
-
-            setDayData(chart_config, t,    
-                simulation.totals.deceased/simulation.config.populationSize * 100.0,
-                simulation.totals.infected/simulation.config.populationSize * 100.0,
-                simulation.totals.recovered/simulation.config.populationSize * 100.0,
-                simulation.totals.susceptible/simulation.config.populationSize * 100.0,
-                );
-            
-                lineChart.update();
-        }
-
-        console.log("End");
+        tickSimulation(0, chart_config, simulation, lineChart);
     }
 </script>
 </html>
