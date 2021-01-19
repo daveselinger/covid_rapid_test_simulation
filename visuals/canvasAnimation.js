@@ -1,11 +1,39 @@
 // Load images
-const blueGuy = new Image();
-blueGuy.src = './images/blue_xs.png';
-blueGuy.width = 10;
+const sprites = {
+    blueGuyRight:    new Image(),
+    greenGuyRight:   new Image(),
+    redGuyRight:     new Image(),
+    neutralGuyRight: new Image(),
 
-const redGuy = new Image();
-redGuy.src = './images/red_sm.png';
-redGuy.width = 10;
+    blueGuyLeft:    new Image(),
+    greenGuyLeft:   new Image(),
+    redGuyLeft:     new Image(),
+    neutralGuyLeft: new Image()
+}
+
+sprites.blueGuyRight.src = './images/blue_sm_right.png';
+sprites.blueGuyRight.width = 22;
+
+sprites.greenGuyRight.src = './images/green_sm_right.png';
+sprites.greenGuyRight.width = 22;
+
+sprites.redGuyRight.src = './images/red_sm_right.png';
+sprites.redGuyRight.width = 22;
+
+sprites.neutralGuyRight.src = './images/neutral_sm_right.png';
+sprites.neutralGuyRight.width = 22;
+
+sprites.blueGuyLeft.src = './images/blue_sm_left.png';
+sprites.blueGuyLeft.width = 22;
+
+sprites.greenGuyLeft.src = './images/green_sm_left.png';
+sprites.greenGuyLeft.width = 22;
+
+sprites.redGuyLeft.src = './images/red_sm_left.png';
+sprites.redGuyLeft.width = 22;
+
+sprites.neutralGuyLeft.src = './images/neutral_sm_left.png';
+sprites.neutralGuyLeft.width = 22;
 
 /**
  * This class runs a visual simulation connected to the COVID simulation model, and renders
@@ -182,7 +210,25 @@ class CanvasSimulation {
                 }
                 this.ctx.fill();
             } else {
-                this.ctx.drawImage(blueGuy, ...d.pos, 20, 27);
+                // Which is the x direction?
+                let actorSprite = sprites.blueGuyRight;
+                if (d.angle > 90 && d.angle < 270) {
+                    switch(this.simulation.actors[i].status) {
+                        case ACTOR_STATUS.EXPOSED:
+                        case ACTOR_STATUS.INFECTIOUS: { actorSprite = sprites.redGuyLeft; break; }
+                        case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyLeft; break; }
+                        case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyLeft; break; }
+                        default: { actorSprite = sprites.blueGuyLeft; }
+                    }
+                } else {
+                    switch(this.simulation.actors[i].status) {
+                        case ACTOR_STATUS.EXPOSED:
+                        case ACTOR_STATUS.INFECTIOUS: { actorSprite = sprites.redGuyRight; break; }
+                        case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyRight; break; }
+                        case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyRight; break; }
+                    }
+                }
+                this.ctx.drawImage(actorSprite, ...d.pos, 20, 27);
             }
         }
     }
