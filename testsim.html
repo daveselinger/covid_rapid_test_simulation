@@ -37,27 +37,8 @@
     console.log("Start");
     document.getElementById('base_form').style.display='none';
 
-    function setupForm(form_name) {
-        base_form = base_form;
-        new_form = base_form.cloneNode(true); ;
-        new_form.setAttribute('id', form_name + "_form");
-        child_elements = new_form.children;
-        for (cur_element of child_elements) {
-            if (cur_element.id == null || cur_element.id == "") {
-                continue;
-            }
-
-            console.log(cur_element.id);
-            cur_element.setAttribute('id', form_name + "_" + cur_element.id );
-            console.log(cur_element.id);
-        }
-
-        new_form.style.display = 'block';
-
-        base_form.parentNode.insertBefore(new_form, base_form.nextSibling);
-
-        document.getElementById(form_name + '_run_simulation').addEventListener('click', function() {
-            var parameters = new SimulationParameters();
+    function getFormParameters(form_name) {
+        var parameters = new SimulationParameters();
             // Population Parameters
             parameters.populationSize = parseInt(document.getElementById(form_name + "_" + 'population_size').value);
             parameters.startingInfectionRate = parseFloat(document.getElementById(form_name + "_" + 'initial_infected').value);
@@ -80,17 +61,41 @@
             parameters.asymptomaticRate = parseFloat(document.getElementById(form_name + "_" + 'asymptomatic_rate').value);
             parameters.recoveredResistance = parseFloat(document.getElementById(form_name + "_" + 'recovered_resistance').value);
 
-            console.log(parameters.populationSize);
-            console.log(parameters.startingInfectionRate);
-            console.log(parameters.testingInterval);
-            console.log(parameters.testingRate);
-            console.log(parameters.populationSize);
-            console.log(parameters.populationSize);
-            console.log(parameters.populationSize);
-            console.log(parameters.populationSize);
-            console.log(parameters.populationSize);
-            console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.startingInfectionRate);
+            // console.log(parameters.testingInterval);
+            // console.log(parameters.testingRate);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+        return parameters;
+    }
 
+    function setupForm(form_name) {
+        base_form = base_form;
+        new_form = base_form.cloneNode(true); ;
+        new_form.setAttribute('id', form_name + "_form");
+        child_elements = new_form.children;
+        for (cur_element of child_elements) {
+            if (cur_element.id == null || cur_element.id == "") {
+                continue;
+            }
+
+            console.log(cur_element.id);
+            cur_element.setAttribute('id', form_name + "_" + cur_element.id );
+            console.log(cur_element.id);
+        }
+
+        new_form.style.display = 'block';
+
+        base_form.parentNode.insertBefore(new_form, base_form.nextSibling);
+
+        document.getElementById(form_name + '_run_simulation').addEventListener('click', function() {
+            parameters = getFormParameters(form_name);
+            
             line_chart_element = document.getElementById(form_name + "_line_chart");
             runSimulation(line_chart_element, parameters);
         });
