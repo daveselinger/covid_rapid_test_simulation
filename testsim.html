@@ -3,6 +3,7 @@
 <script src="./lib/simulation.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.bundle.min.js"></script>
 <script src="./lib/linechart.js"></script>
+<script src="./lib/simulation_display.js"></script>
 
 <div id=base_form style="width: 100%; height: 100%">
     <canvas id="line_chart"></canvas>
@@ -98,48 +99,11 @@
     setupForm('boop');
     setupForm('boop_badoop');
 
-    function tickSimulation (t, chart_config, simulation, lineChart) {
-        if (t==500) {
-            console.log("End");
-        }
-
-        simulation.tick();
-
-        console.log(simulation.tickCnt,
-            simulation.totals.susceptible,
-            simulation.totals.infected,
-            simulation.totals.recovered,
-            simulation.totals.deceased,
-            simulation.totals.testsConducted,
-            simulation.totals.daysLost,
-        )
-        //simulation.update();
-
-        setDayData(chart_config, t,    
-            simulation.totals.deceased/simulation.config.populationSize * 100.0,
-            simulation.totals.infected/simulation.config.populationSize * 100.0,
-            simulation.totals.recovered/simulation.config.populationSize * 100.0,
-            simulation.totals.susceptible/simulation.config.populationSize * 100.0,
-            );
-        
-        lineChart.update();
-        lineChart.render();
-        setTimeout(() => { tickSimulation(t+1, chart_config, simulation, lineChart) }, 200);
-    }
-
     function runSimulation(line_chart_element, parameters) {
-        var simulation = new Simulation(parameters);
-        let running = true;
-
-        //Initialize chart
-        var ctx = line_chart_element.getContext("2d");
-
-        var chart_config = initChart(500);
-        var lineChart = new Chart(ctx, chart_config);
-        lineChart.options.animation = false; 
-
-        tickSimulation(0, chart_config, simulation, lineChart);
+        simulation_display = new SimulationDisplay(line_chart_element, parameters);
+        simulation_display.start();
     }
+
 </script>
 </html>
 
