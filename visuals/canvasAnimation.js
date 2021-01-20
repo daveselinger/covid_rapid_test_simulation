@@ -249,6 +249,14 @@ class CanvasSimulation {
         }
     }
 
+    toggleActorDisplay() {
+        if (this.actorType === 1) {
+            this.actorType = 0;
+        } else {
+            this.actorType = 1;
+        }
+    }
+
     start() {
         if (!this.started && !this.running) {
             this.frameCount = 0;
@@ -357,6 +365,7 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
         );
         mySimulation.start();
     });
+    $(wrapper).find('.controls .btn-toggleActor').click(function() { mySimulation.toggleActorDisplay(); });
 
     return mySimulation;
     
