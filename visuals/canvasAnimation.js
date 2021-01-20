@@ -47,6 +47,9 @@ class CanvasSimulation {
     /** Whether or not this visualization is currently running. */
     running = false;
 
+    /** How many animation frames equal 1 day of simulation. */
+    dayFrameRate = 20;
+
     constructor(canvas, simulation, opts){
         this.simulation = simulation;
         console.log('Building visualization for simulation:', this.simulation);
@@ -61,6 +64,8 @@ class CanvasSimulation {
         this.actorType = opts && opts.actorType
             ? (opts.actorType === 'guy' ? 1 : 0)
             : 0;
+
+        this.frameCount = 0;
 
         // Add all the actors for this simulation
         const populationSize = simulation.config.populationSize;
@@ -96,6 +101,7 @@ class CanvasSimulation {
     }
     
     tick(){
+        this.frameCount++;
         const numberOfAtoms = this.atoms.length;
         for (let i = 0; i < numberOfAtoms; i++){
             const atom = this.atoms[i];
@@ -113,8 +119,17 @@ class CanvasSimulation {
                     && !atom0.collided
                 ) {
 
-                    // TODO: Call interaction method in simulation
-
+                    // Call simulation model to check if there is a transmission...
+                    const actor1 = this.simulation.actors[i];
+                    const actor2 = this.simulation.actors[j];
+                    // If either of the actors is infections, and neither are isolated, there is a
+                    // possible transmission event.
+                    if ((actor1.status === ACTOR_STATUS.INFECTIOUS || actor2.status === ACTOR_STATUS.INFECTIOUS)
+                        && !actor1.isolated
+                        && !actor2.isolated
+                    ) {
+                        this.simulation.checkExposure(actor1, actor2);
+                    } 
 
                     // To avoid having them stick to each other,
                     // test if moving them in each other's angles will bring them closer or farther apart
@@ -169,10 +184,11 @@ class CanvasSimulation {
             }
         }
 
-        // this.simulation.tickInteractions();
-        // this.simulation.tickRapidTesting();
-        // this.simulation.tickDisease();
-        this.simulation.tick();
+        // Each frame of the animation = 1/20th (or config) of a day
+        if (this.frameCount % this.dayFrameRate === 0) {
+            this.simulation.tickRapidTesting();
+            this.simulation.tickDisease();
+        }
     }
 
     /**
@@ -235,6 +251,7 @@ class CanvasSimulation {
 
     start() {
         if (!this.started && !this.running) {
+            this.frameCount = 0;
             this.started = true;
             this.running = true;
             this.runCanvasAnimation();
@@ -265,34 +282,38 @@ class CanvasSimulation {
 
     reset() {
         // TODO: not yet implemented
+        this.frameCount = 0;
     }
 
 }
 
 /**
  * Creates a new instance of CanvasSimulation and sets up tha canvas.
- * @param {*} canvas - A canvas DOM node which will render the data.
- * @param {Object} simulation - A canvas DOM node which will render the data.
+ * @param {DOM} canvas - A canvas DOM node which will render the data.
+ * @param {Object} simulationOptions - A selection of initial options to use.
  * @param {*} [options] - Initialization options.
  * @returns A new instance of `CanvasSimulation`.
  */
-const simulationFactory = (canvas, simulation, options) => {
+const simulationFactory = (canvas, simulationOptions, options) => {
+    const parameters = new SimulationParameters(simulationOptions);
+    const simulation = new Simulation(parameters);
     const visualization = new CanvasSimulation(
         canvas,
         simulation,
         options
     );
 
-    // Style the canvas
-    canvas.width = visualization.width;
-    canvas.height = visualization.height;
-    canvas.style.background = 'white';
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     return visualization;
 };
+
+function loadOptions(wrapper) {
+    const options = {};
+    const populationSize = parseInt($(wrapper).find('input[name=populationSize').val(), 10);
+    if (populationSize) { options.populationSize = populationSize; }
+    const startingInfectionRate = parseInt($(wrapper).find('input[name=startingInfectionRate').val(), 10) / 100;
+    if (startingInfectionRate) { options.startingInfectionRate = startingInfectionRate; }
+    return options;
+}
 
 /**
  * Creates a new simulation within the given wrapper and connects UI controls to
@@ -308,22 +329,30 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
     const canvas = document.createElement('canvas');
     graphic.appendChild(canvas);
 
-    const parameters = new SimulationParameters(simulationOptions);
-    const simulation = new Simulation(parameters);
+    // Style the canvas
+    canvas.width = graphic.clientWidth;
+    canvas.height = graphic.clientHeight;
+    canvas.style.background = 'white';
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    let mySimulation = simulationFactory(
-        canvas,
-        simulation,
-        { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
-    );
+    let mySimulation;
 
     // Set up controls
-    $(wrapper).find('.controls .btn-start').click(function() { mySimulation.start(); });
+    $(wrapper).find('.controls .btn-start').click(function() {
+        mySimulation = simulationFactory(
+            canvas,
+            { ...simulationOptions, ...loadOptions(wrapper) },
+            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
+        );
+        mySimulation.start();
+    });
     $(wrapper).find('.controls .btn-pause').click(function() { mySimulation.toggle(); });
     $(wrapper).find('.controls .btn-reset').click(function() {
         mySimulation = simulationFactory(
             canvas,
-            simulation,
+            { ...simulationOptions, ...loadOptions(wrapper) },
             { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
         );
         mySimulation.start();
