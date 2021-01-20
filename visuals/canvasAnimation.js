@@ -4,11 +4,13 @@ const sprites = {
     greenGuyRight:   new Image(),
     redGuyRight:     new Image(),
     neutralGuyRight: new Image(),
+    redGuyRightIso:  new Image(),
 
     blueGuyLeft:    new Image(),
     greenGuyLeft:   new Image(),
     redGuyLeft:     new Image(),
-    neutralGuyLeft: new Image()
+    neutralGuyLeft: new Image(),
+    redGuyLeftIso:  new Image(),
 }
 
 sprites.blueGuyRight.src = './images/blue_sm_right.png';
@@ -19,6 +21,9 @@ sprites.greenGuyRight.width = 22;
 
 sprites.redGuyRight.src = './images/red_sm_right.png';
 sprites.redGuyRight.width = 22;
+
+sprites.redGuyRightIso.src = './images/red_sm_isolated_right.png';
+sprites.redGuyRightIso.width = 22;
 
 sprites.neutralGuyRight.src = './images/neutral_sm_right.png';
 sprites.neutralGuyRight.width = 22;
@@ -31,6 +36,9 @@ sprites.greenGuyLeft.width = 22;
 
 sprites.redGuyLeft.src = './images/red_sm_left.png';
 sprites.redGuyLeft.width = 22;
+
+sprites.redGuyLeftIso.src = './images/red_sm_isolated_left.png';
+sprites.redGuyLeftIso.width = 22;
 
 sprites.neutralGuyLeft.src = './images/neutral_sm_left.png';
 sprites.neutralGuyLeft.width = 22;
@@ -231,7 +239,14 @@ class CanvasSimulation {
                 if (d.angle > 90 && d.angle < 270) {
                     switch(this.simulation.actors[i].status) {
                         case ACTOR_STATUS.EXPOSED:
-                        case ACTOR_STATUS.INFECTIOUS: { actorSprite = sprites.redGuyLeft; break; }
+                        case ACTOR_STATUS.INFECTIOUS: {
+                            if (this.simulation.actors[i].isolated) {
+                                actorSprite = sprites.redGuyLeftIso;
+                            } else {
+                                actorSprite = sprites.redGuyLeft;
+                            }
+                            break;
+                        }
                         case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyLeft; break; }
                         case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyLeft; break; }
                         default: { actorSprite = sprites.blueGuyLeft; }
@@ -239,7 +254,14 @@ class CanvasSimulation {
                 } else {
                     switch(this.simulation.actors[i].status) {
                         case ACTOR_STATUS.EXPOSED:
-                        case ACTOR_STATUS.INFECTIOUS: { actorSprite = sprites.redGuyRight; break; }
+                        case ACTOR_STATUS.INFECTIOUS: {
+                            if (this.simulation.actors[i].isolated) {
+                                actorSprite = sprites.redGuyRightIso;
+                            } else {
+                                actorSprite = sprites.redGuyRight;
+                            }
+                            break;
+                        }
                         case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyRight; break; }
                         case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyRight; break; }
                     }
