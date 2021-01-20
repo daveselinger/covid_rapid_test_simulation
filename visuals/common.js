@@ -4,6 +4,7 @@ const COLORS = {
     TEAL:    '#14B5D0',
     YELLOW:  '#F7D154',
     ORANGE:  '#D9822B',
+    PURPLE:  '#735DD0',
     RED:     '#EC4C47',
     GREEN:   '#47B881',
     NEUTRAL: '#425A70',

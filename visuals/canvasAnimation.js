@@ -132,12 +132,19 @@ class CanvasSimulation {
                     const actor2 = this.simulation.actors[j];
                     // If either of the actors is infections, and neither are isolated, there is a
                     // possible transmission event.
-                    if ((actor1.status === ACTOR_STATUS.INFECTIOUS || actor2.status === ACTOR_STATUS.INFECTIOUS)
+                    if (actor1.status === ACTOR_STATUS.INFECTIOUS
+                        && actor2.status === ACTOR_STATUS.SUSCEPTIBLE
                         && !actor1.isolated
                         && !actor2.isolated
                     ) {
-                        this.simulation.checkExposure(actor1, actor2);
-                    } 
+                        actor2.infect(this.simulation.config);
+                    } else if (actor2.status === ACTOR_STATUS.INFECTIOUS
+                        && actor1.status === ACTOR_STATUS.SUSCEPTIBLE
+                        && !actor1.isolated
+                        && !actor2.isolated
+                    ) {
+                        actor1.infect(this.simulation.config);
+                    }
 
                     // To avoid having them stick to each other,
                     // test if moving them in each other's angles will bring them closer or farther apart
@@ -226,7 +233,7 @@ class CanvasSimulation {
                 this.ctx.beginPath();
                 this.ctx.arc(...d.pos, d.radius, 0, 2 * Math.PI);
                 switch(this.simulation.actors[i].status) {
-                    case ACTOR_STATUS.EXPOSED:
+                    case ACTOR_STATUS.EXPOSED: { this.ctx.fillStyle = COLORS.YELLOW; break; }
                     case ACTOR_STATUS.INFECTIOUS: { this.ctx.fillStyle = COLORS.RED; break; }
                     case ACTOR_STATUS.RECOVERED: { this.ctx.fillStyle = COLORS.GREEN; break; }
                     case ACTOR_STATUS.DECEASED: { this.ctx.fillStyle = COLORS.DARK; break; }
