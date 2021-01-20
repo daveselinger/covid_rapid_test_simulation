@@ -3,50 +3,113 @@
 <script src="./lib/simulation.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.bundle.min.js"></script>
 <script src="./lib/linechart.js"></script>
-<div style="width: 100%; height: 100%">
+<script src="./lib/simulation_display.js"></script>
+
+<div id=base_form style="width: 100%; height: 100%">
     <canvas id="line_chart"></canvas>
+   Starting parameters <br/>
+   Population <input id=population_size type=text value=10000 /><br/>
+   Initial Infected Pct <input type=text id=initial_infected value=0.004 /><br/>
+   Self-isolating symptomatic (with or without test) <input type=text id=self_isolation_rate value=0.1><br />
+   Self-isolating days  <input type=text id=positive_test_isolation_interval value=14><br />
+   Daily interactions (avg) <input type=text id=num_interactions value=2.05><br />
+   Daily interactions (STD) <input type=text id=num_interactions_std value=0.02><br />
+
+   Rapid Testing Parameters <br />
+   Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
+   Percent of population testing <input type=text id=testing_rate value=0.6 /><br/>
+   False Positive percent <input type=text id=false_positive value=0.01 /><br/>
+   False Negative percent <input type=text id=false_negative value="0.02" /><br/>
+
+   Disease Parameters <br />
+   Days to Contagious <input type=text id=days_to_contagious value=3 /><br/>
+   Days to Detectable <input type=text id=days_to_detectable value=3.5 /><br/>
+   Days to Symptoms <input type=text id=days_to_symptoms value=5.5 /><br/>
+   Days to Recovery <input type=text id=days_to_recovery value=14.0 /><br/>
+   Mortality Rate <input type=text id=mortality_rate value=0.01 /><br/>
+   Asymptomatic Rate <input type=text id=asymptomatic_rate value=0.2 /><br/>
+   Recovered Resistance <input type=text id=recovered_resistance value=0.98 /><br/>
+
+   <button id="run_simulation">Run Simulation</button>
 </div>
-  
 
 <script>
-    console.log("Start")
-    const parameters = new SimulationParameters();
-    console.log(parameters.populationSize);
-    const simulation = new Simulation(parameters);
-    let running = true;
+    console.log("Start");
+    document.getElementById('base_form').style.display='none';
 
-    //Initialize chart
-    var ctx = document.getElementById("line_chart").getContext("2d");
+    function getFormParameters(form_name) {
+        var parameters = new SimulationParameters();
+            // Population Parameters
+            parameters.populationSize = parseInt(document.getElementById(form_name + "_" + 'population_size').value);
+            parameters.startingInfectionRate = parseFloat(document.getElementById(form_name + "_" + 'initial_infected').value);
+            parameters.positiveTestIsolationInterval = parseFloat(document.getElementById(form_name + "_" + 'positive_test_isolation_interval').value);
+            parameters.numInteractions = parseFloat(document.getElementById(form_name + "_" + 'num_interactions').value);
+            parameters.numInteractionsSTD = parseFloat(document.getElementById(form_name + "_" + 'num_interactions_std').value);
 
-    chart_config = initChart(500);
-    var lineChart = new Chart(ctx, chart_config);
+            // Testing Parameters
+            parameters.testingInterval = parseFloat(document.getElementById(form_name + "_" + 'testing_interval_days').value);
+            parameters.testingRate = parseFloat(document.getElementById(form_name + "_" + 'testing_rate').value);
+            parameters.falsePositiveRate = parseFloat(document.getElementById(form_name + "_" + 'false_positive').value);
+            parameters.falseNegative = parseFloat(document.getElementById(form_name + "_" + 'false_negative').value);
 
-    for (t = 0; t < 500; t++) {
-        simulation.tick();
+            // Disease Parameters
+            parameters.daysToContagious = parseFloat(document.getElementById(form_name + "_" + 'days_to_contagious').value);
+            parameters.daysToDetectable = parseFloat(document.getElementById(form_name + "_" + 'days_to_detectable').value);
+            parameters.daysToSymptoms = parseFloat(document.getElementById(form_name + "_" + 'days_to_symptoms').value);
+            parameters.daysToRecovery = parseFloat(document.getElementById(form_name + "_" + 'days_to_recovery').value);
+            parameters.mortalityRate = parseFloat(document.getElementById(form_name + "_" + 'mortality_rate').value);
+            parameters.asymptomaticRate = parseFloat(document.getElementById(form_name + "_" + 'asymptomatic_rate').value);
+            parameters.recoveredResistance = parseFloat(document.getElementById(form_name + "_" + 'recovered_resistance').value);
 
-        console.log(simulation.tickCnt,
-            simulation.totals.susceptible,
-            simulation.totals.infected,
-            simulation.totals.recovered,
-            simulation.totals.deceased,
-            simulation.totals.testsConducted,
-            simulation.totals.daysLost,
-        )
-        //simulation.update();
-
-        setDayData(chart_config, t,    
-            simulation.totals.deceased/simulation.config.populationSize * 100.0,
-            simulation.totals.infected/simulation.config.populationSize * 100.0,
-            simulation.totals.recovered/simulation.config.populationSize * 100.0,
-            simulation.totals.susceptible/simulation.config.populationSize * 100.0,
-            );
-        
-            lineChart.update();
+            // console.log(parameters.populationSize);
+            // console.log(parameters.startingInfectionRate);
+            // console.log(parameters.testingInterval);
+            // console.log(parameters.testingRate);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+        return parameters;
     }
 
-    console.log("End")
+    function setupForm(form_name) {
+        base_form = base_form;
+        new_form = base_form.cloneNode(true); ;
+        new_form.setAttribute('id', form_name + "_form");
+        child_elements = new_form.children;
+        for (cur_element of child_elements) {
+            if (cur_element.id == null || cur_element.id == "") {
+                continue;
+            }
+
+            console.log(cur_element.id);
+            cur_element.setAttribute('id', form_name + "_" + cur_element.id );
+            console.log(cur_element.id);
+        }
+
+        new_form.style.display = 'block';
+
+        base_form.parentNode.insertBefore(new_form, base_form.nextSibling);
+
+        document.getElementById(form_name + '_run_simulation').addEventListener('click', function() {
+            parameters = getFormParameters(form_name);
+            
+            line_chart_element = document.getElementById(form_name + "_line_chart");
+            runSimulation(line_chart_element, parameters);
+        });
+    }
+
+    setupForm('boop');
+    setupForm('boop_badoop');
+
+    function runSimulation(line_chart_element, parameters) {
+        simulation_display = new SimulationDisplay(line_chart_element, parameters, 500);
+        simulation_display.start();
+    }
+
 </script>
-Simulation testing.
 </html>
 
   
