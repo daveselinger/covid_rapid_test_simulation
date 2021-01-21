@@ -347,6 +347,10 @@ function loadOptions(wrapper) {
     if (populationSize) { options.populationSize = populationSize; }
     const startingInfectionRate = parseInt($(wrapper).find('input[name=startingInfectionRate').val(), 10) / 100;
     if (startingInfectionRate) { options.startingInfectionRate = startingInfectionRate; }
+    const testingInterval = parseFloat($(wrapper).find('input[name=testingInterval').val());
+    if (testingInterval) { options.testingInterval = testingInterval; }
+    const testingRate = parseFloat($(wrapper).find('input[name=testingRate').val()) / 100;
+    if (testingRate) { options.testingRate = testingRate; }
     return options;
 }
 
