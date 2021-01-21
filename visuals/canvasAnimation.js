@@ -137,13 +137,13 @@ class CanvasSimulation {
                         && !actor1.isolated
                         && !actor2.isolated
                     ) {
-                        actor2.infect(this.simulation.config);
+                        actor2.infect();
                     } else if (actor2.status === ACTOR_STATUS.INFECTIOUS
                         && actor1.status === ACTOR_STATUS.SUSCEPTIBLE
                         && !actor1.isolated
                         && !actor2.isolated
                     ) {
-                        actor1.infect(this.simulation.config);
+                        actor1.infect();
                     }
 
                     // To avoid having them stick to each other,
