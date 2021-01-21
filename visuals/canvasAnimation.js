@@ -56,7 +56,7 @@ class CanvasSimulation {
     running = false;
 
     /** How many animation frames equal 1 day of simulation. */
-    dayFrameRate = 20;
+    dayFrameRate = 10;
 
     constructor(canvas, simulation, opts){
         this.simulation = simulation;
@@ -200,10 +200,8 @@ class CanvasSimulation {
         }
 
         // Each frame of the animation = 1/20th (or config) of a day
-        if (this.frameCount % this.dayFrameRate === 0) {
-            this.simulation.tickRapidTesting();
-            this.simulation.tickDisease();
-        }
+        this.simulation.tickRapidTesting(1.0/this.dayFrameRate);
+        this.simulation.tickDisease(1.0/this.dayFrameRate);
     }
 
     /**
