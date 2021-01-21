@@ -56,7 +56,7 @@ class CanvasSimulation {
     running = false;
 
     /** How many animation frames equal 1 day of simulation. */
-    dayFrameRate = 20;
+    dayFrameRate = 10;
 
     hooks = {
         onCollision: function() {},
@@ -85,7 +85,7 @@ class CanvasSimulation {
         if (hooks && hooks.onCollision) { this.hooks.onCollision = hooks.onCollision; }
 
         // Add all the actors for this simulation
-        const populationSize = simulation.config.populationSize;
+        const populationSize = simulation.simulationParameters.populationSize;
         for (let i = 0; i < populationSize; i++){
             const radius = 5;
     
@@ -148,13 +148,13 @@ class CanvasSimulation {
                         && !actor1.isolated
                         && !actor2.isolated
                     ) {
-                        actor2.infect(this.simulation.config);
+                        actor2.infect();
                     } else if (actor2.status === ACTOR_STATUS.INFECTIOUS
                         && actor1.status === ACTOR_STATUS.SUSCEPTIBLE
                         && !actor1.isolated
                         && !actor2.isolated
                     ) {
-                        actor1.infect(this.simulation.config);
+                        actor1.infect();
                     }
 
                     // To avoid having them stick to each other,
@@ -214,11 +214,11 @@ class CanvasSimulation {
         }
 
         // Each frame of the animation = 1/20th (or config) of a day
-        if (this.frameCount % this.dayFrameRate === 0) {
-            this.simulation.tickRapidTesting();
-            this.simulation.tickDisease();
+        this.simulation.tickRapidTesting(1.0/this.dayFrameRate);
+        this.simulation.tickDisease(1.0/this.dayFrameRate);
 
-            // Each day that passes, call the onInterval hook
+        // Each day that passes, call the onInterval hook
+        if (this.frameCount % this.dayFrameRate === 0) {
             this.hooks.onInterval(this.simulation);
         }
     }
@@ -371,6 +371,10 @@ function loadOptions(wrapper) {
     if (populationSize) { options.populationSize = populationSize; }
     const startingInfectionRate = parseInt($(wrapper).find('input[name=startingInfectionRate').val(), 10) / 100;
     if (startingInfectionRate) { options.startingInfectionRate = startingInfectionRate; }
+    const testingInterval = parseFloat($(wrapper).find('input[name=testingInterval').val());
+    if (testingInterval) { options.testingInterval = testingInterval; }
+    const testingRate = parseFloat($(wrapper).find('input[name=testingRate').val()) / 100;
+    if (testingRate) { options.testingRate = testingRate; }
     return options;
 }
 

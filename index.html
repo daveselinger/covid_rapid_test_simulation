@@ -72,9 +72,13 @@
                 <div class="controls row d-flex align-items-center">
                     <div class="col">
                         <strong>Population:</strong>
-                        <input type="number" name="populationSize" value="200" min="50" max="2000" />
+                        <input type="number" name="populationSize" value="200" min="50" max="2000" /><br/>
                         <strong>Infected:</strong>
-                        <input type="number" name="startingInfectionRate" value="20" min="1" max="99" />%
+                        <input type="number" name="startingInfectionRate" value="5" min="1" max="99" />%<br/>
+                        <strong>Rapid testing interval (days):</strong>
+                        <input type="number" name="testingInterval" value="3" min="1" max="200" /><br/>
+                        <strong>Population testing:</strong>
+                        <input type="number" name="testingRate" value="50" min="1" max="99" />%<br/>
                     </div>
                     <div class="col text-end">
                         <button class="btn btn-outline-secondary btn-toggleActor"> Dots</button>
