@@ -46,7 +46,9 @@ dd {
 
 footer {
     display: block;
+    text-align: center;
     width: auto;
+    margin-top: 32px;
     padding: 15px;
     border-top: solid 1px #E4E7EB;
 }

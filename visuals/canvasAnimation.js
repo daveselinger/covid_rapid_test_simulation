@@ -58,9 +58,14 @@ class CanvasSimulation {
     /** How many animation frames equal 1 day of simulation. */
     dayFrameRate = 20;
 
-    constructor(canvas, simulation, opts){
+    hooks = {
+        onCollision: function() {},
+        onInterval: function() {}
+    };
+
+    constructor(canvas, simulation, opts, hooks){
         this.simulation = simulation;
-        console.log('Building visualization for simulation:', this.simulation);
+        console.log('Building visualization for simulation:', this.simulation, hooks);
 
         // Set up canvas
         this.canvas = canvas;
@@ -74,6 +79,10 @@ class CanvasSimulation {
             : 0;
 
         this.frameCount = 0;
+
+        // Set up event hooks
+        if (hooks && hooks.onInterval) { this.hooks.onInterval = hooks.onInterval; }
+        if (hooks && hooks.onCollision) { this.hooks.onCollision = hooks.onCollision; }
 
         // Add all the actors for this simulation
         const populationSize = simulation.config.populationSize;
@@ -121,8 +130,10 @@ class CanvasSimulation {
                 atom0.collided = false;
 
                 // Collision!
+                const atomShieldRadius = this.simulation.actors[i].isolated ? 4 : 0;
+                const atom0ShieldRadius = this.simulation.actors[j].isolated ? 4 : 0;
                 if (i !== j
-                    && geometric.lineLength([atom.pos, atom0.pos]) < atom.radius + atom0.radius
+                    && geometric.lineLength([atom.pos, atom0.pos]) < (atom.radius + atom0.radius + atomShieldRadius + atom0ShieldRadius)
                     && !atom.collided
                     && !atom0.collided
                 ) {
@@ -169,6 +180,9 @@ class CanvasSimulation {
                         atom0.collided = true;
                     }
 
+                    // Post collision event, call hook
+                    this.hooks.onCollision(actor1, actor2);
+
                     break;
                 }
             }
@@ -203,6 +217,9 @@ class CanvasSimulation {
         if (this.frameCount % this.dayFrameRate === 0) {
             this.simulation.tickRapidTesting();
             this.simulation.tickDisease();
+
+            // Each day that passes, call the onInterval hook
+            this.hooks.onInterval(this.simulation);
         }
     }
 
@@ -331,18 +348,23 @@ class CanvasSimulation {
  * @param {*} [options] - Initialization options.
  * @returns A new instance of `CanvasSimulation`.
  */
-const simulationFactory = (canvas, simulationOptions, options) => {
+const simulationFactory = (canvas, simulationOptions, options, hooks) => {
     const parameters = new SimulationParameters(simulationOptions);
     const simulation = new Simulation(parameters);
     const visualization = new CanvasSimulation(
         canvas,
         simulation,
-        options
+        options,
+        hooks
     );
 
     return visualization;
 };
 
+/**
+ * Checks DOM elements for input and returns an updated options object.
+ * @param {DOM} wrapper - The wrapper DOM element for the graphic.
+ */
 function loadOptions(wrapper) {
     const options = {};
     const populationSize = parseInt($(wrapper).find('input[name=populationSize').val(), 10);
@@ -360,7 +382,12 @@ function loadOptions(wrapper) {
  * @param {Object} [visualOptions] - An object containing visualization options.
  * @returns A reference to the `CanvasSimulation` instance created.
  */
-function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = {}) {
+function makeCanvasAnimation(
+    elementId,
+    simulationOptions = {},
+    visualOptions = {},
+    hooks = {}
+) {
     const wrapper = document.getElementById(elementId);
     const graphic = document.getElementById(`${elementId}-Graphic`);
     const canvas = document.createElement('canvas');
@@ -381,7 +408,8 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
         mySimulation = simulationFactory(
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
-            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
+            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
+            hooks
         );
         mySimulation.start();
     });
@@ -390,7 +418,8 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
         mySimulation = simulationFactory(
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
-            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
+            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
+            hooks
         );
         mySimulation.start();
     });

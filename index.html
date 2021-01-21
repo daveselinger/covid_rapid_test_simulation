@@ -43,17 +43,27 @@
     <div class="container-md">
 
         <div class="block sm">
-            <h1>Simulation testing.</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <h1>COVID Visual Simulation</h1>
+            <p>This is a visual simulation to communicate the spread of COVID among a population, and the power of isolation in controlling spread.</p>
         </div>
 
         <div id="Simulation1">
-            <div class="block sm">
-                <dl>
-                    <dt>Infected</dt><dd class="infected number">&nbsp;</dd>
-                    <dt>Recovered</dt><dd class="recovered number">&nbsp;</dd>
-                    <dt>Deceased</dt><dd class="deceased number">&nbsp;</dd>
-                </dl>
+            <div class="row block sm">
+                <div class="col-3">
+                    <dl class="stats">
+                        <dt>Infected</dt><dd class="infected number">&nbsp;</dd>
+                        <dt>Recovered</dt><dd class="recovered number">&nbsp;</dd>
+                        <dt>Deceased</dt><dd class="deceased number">&nbsp;</dd>
+                    </dl>
+                </div>
+                <div class="col-3">
+                    <dl class="stats">
+                        <dt>Total Exposures</dt><dd class="exposed number"></dd>
+                    </dl>
+                </div>
+                <div class="col-6">
+                    <img src="images/color_key_cropped.png" style="width: 100%" alt="Color Key" />
+                </div>
             </div>
             <div class="block">
                 <div id="Simulation1-Graphic" class="simulation"></div>
@@ -76,6 +86,26 @@
             </div>
         </div>
 
+        <div class="block sm">
+            <h2>PCR vs Antigen</h2>
+            <p>This is a public health test, <em>not</em> a diagnostic. The effect is measured in aggregate, not at the individual level.</p>
+        </div>
+
+        <div class="block">
+            
+        </div>
+
+        <div class="block sm">
+            <h2>Perfect The Enemy of Good</h2>
+            <p>A good test now is better than a perfect test next week.</p>
+        </div>
+
+        <div class="block sm">
+            <h2>Accuracy Measured in the Window Where it Matters</h2>
+            <p>Display timeline of infection and symptoms, and test results when the person is actually infectious.</p>
+        </div>
+
+<!--         
         <div id="Simulation2">
             <div class="block sm">
                 <dl>
@@ -99,11 +129,13 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
     </div>
 
-    <footer>&nbsp;</footer>
+    <footer>
+        <span class="text-muted">Made in USA &#9733;</span>
+    </footer>
 </body>
 
 <!-- External -->
@@ -124,13 +156,30 @@
             populationSize: 200,
             startingInfectionRate: 0.2
         });
-        makeCanvasAnimation('Simulation1', parameters1);
+        const stats1 = {
+            infected: $('#Simulation1 .stats .infected')[0],
+            recovered: $('#Simulation1 .stats .recovered')[0],
+            deceased: $('#Simulation1 .stats .deceased')[0],
+            exposed: $('#Simulation1 .stats .exposed')[0]
+        }
+        const hooks1 = {
+            onInterval: function(sim) {
+                stats1.infected.innerHTML = sim.totals.infected;
+                stats1.recovered.innerHTML = sim.totals.recovered;
+                stats1.deceased.innerHTML = sim.totals.deceased;
+            },
+            onCollision: function(actor1, actor2) {
+                console.log('Viz: collission!', actor1);
+                if (actor1.status === 1 || actor2.status === 1) { }
+            }
+        }
+        makeCanvasAnimation('Simulation1', parameters1, {}, hooks1);
 
-        const parameters2 = new SimulationParameters({
-            populationSize: 500,
-            startingInfectionRate: 0.5
-        });
-        makeCanvasAnimation('Simulation2', parameters2);
+        // const parameters2 = new SimulationParameters({
+        //     populationSize: 500,
+        //     startingInfectionRate: 0.5
+        // });
+        // makeCanvasAnimation('Simulation2', parameters2);
     };
 </script>
 
