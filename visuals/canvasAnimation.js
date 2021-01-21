@@ -76,7 +76,7 @@ class CanvasSimulation {
         this.frameCount = 0;
 
         // Add all the actors for this simulation
-        const populationSize = simulation.config.populationSize;
+        const populationSize = simulation.simulationParameters.populationSize;
         for (let i = 0; i < populationSize; i++){
             const radius = 5;
     
