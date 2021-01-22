@@ -350,7 +350,9 @@ function loadOptions(wrapper) {
     const testingInterval = parseFloat($(wrapper).find('input[name=testingInterval').val());
     if (testingInterval) { options.testingInterval = testingInterval; }
     const testingRate = parseFloat($(wrapper).find('input[name=testingRate').val()) / 100;
-    if (testingRate) { options.testingRate = testingRate; }
+    console.log("TESTING RATE:" + testingRate);
+    options.testingRate = testingRate;
+    options.selfIsolationRate = 0;
     return options;
 }
 
