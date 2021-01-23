@@ -64,8 +64,8 @@ class CanvasSimulation {
         onExposure: function() {}
     };
 
-    constructor(element, canvas, simulation, opts, hooks){
-        this.element = element;
+    constructor(wrapperElement, canvas, simulation, opts, hooks){
+        this.wrapperElement = wrapperElement;
         this.simulation = simulation;
         console.log('Building visualization for simulation:', this.simulation, hooks);
 
@@ -103,10 +103,10 @@ class CanvasSimulation {
             });
         }
 
-        this.susceptibleNumberText = $(element).find("#susceptibleNumber");
-        this.infectedNumberText = $(element).find("#infectedNumber");
-        this.recoveredNumberText = $(element).find("#recoveredNumber");
-        this.deceasedNumberText = $(element).find("#deceasedNumber");
+        this.susceptibleNumberText = $(wrapperElement).find("#susceptibleNumber");
+        this.infectedNumberText = $(wrapperElement).find("#infectedNumber");
+        this.recoveredNumberText = $(wrapperElement).find("#recoveredNumber");
+        this.deceasedNumberText = $(wrapperElement).find("#deceasedNumber");
 
         // Ensure methods are bound to correct "this" context.
         this.runAnimation = this.runAnimation.bind(this);
@@ -344,7 +344,7 @@ class CanvasSimulation {
      */
     runAnimation() {
         if (!this.running) { return; }
-        requestAnimationFrame(this.runAnimation);
+        this.animationFrame = requestAnimationFrame(this.runAnimation);
 
         // The simulation.tick method advances the simulation one tick
         this.tick();
@@ -369,9 +369,17 @@ class CanvasSimulation {
         }
     }
 
+    stop() {
+        this.started = false;
+        this.running = false;
+        cancelAnimationFrame(this.animationFrame);
+        this.ctx.clearRect(0, 0, this.width, this.height);
+    }
+
     pause() {
         if (!this.started) { return; }
         this.running = false;
+        cancelAnimationFrame(this.animationFrame);
     }
 
     resume() {
@@ -483,6 +491,7 @@ function makeCanvasAnimation(
     });
     $(wrapper).find('.controls .btn-pause').click(function() { mySimulation.toggle(); });
     $(wrapper).find('.controls .btn-reset').click(function() {
+        mySimulation.stop();
         mySimulation = simulationFactory(
             wrapper,
             canvas,
@@ -490,7 +499,7 @@ function makeCanvasAnimation(
             { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
             hooks
         );
-        mySimulation.start();
+        // mySimulation.start();
     });
     $(wrapper).find('.controls .btn-toggleActor').click(function() { mySimulation.toggleActorDisplay(); });
 
