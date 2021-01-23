@@ -64,7 +64,8 @@ class CanvasSimulation {
         onExposure: function() {}
     };
 
-    constructor(canvas, simulation, opts, hooks){
+    constructor(element, canvas, simulation, opts, hooks){
+        this.element = element;
         this.simulation = simulation;
         console.log('Building visualization for simulation:', this.simulation, hooks);
 
@@ -101,6 +102,11 @@ class CanvasSimulation {
                 radius
             });
         }
+
+        this.susceptibleNumberText = $(element).find("#susceptibleNumber");
+        this.infectedNumberText = $(element).find("#infectedNumber");
+        this.recoveredNumberText = $(element).find("#recoveredNumber");
+        this.deceasedNumberText = $(element).find("#deceasedNumber");
 
         // Ensure methods are bound to correct "this" context.
         this.runAnimation = this.runAnimation.bind(this);
@@ -218,6 +224,11 @@ class CanvasSimulation {
                 this.ctx.drawImage(actorSprite, ...d.pos, 20, 27);
             }
         }
+
+        this.susceptibleNumberText.text(this.simulation.totals.susceptible);
+        this.infectedNumberText.text(this.simulation.totals.infected);
+        this.recoveredNumberText.text(this.simulation.totals.recovered);
+        this.deceasedNumberText.text(this.simulation.totals.deceased);
     }
     
     tick(){
@@ -394,10 +405,11 @@ class CanvasSimulation {
  * @param {*} [options] - Initialization options.
  * @returns A new instance of `CanvasSimulation`.
  */
-const simulationFactory = (canvas, simulationOptions, options, hooks) => {
+const simulationFactory = (element, canvas, simulationOptions, options, hooks) => {
     const parameters = new SimulationParameters(simulationOptions);
     const simulation = new Simulation(parameters);
     const visualization = new CanvasSimulation(
+        element,
         canvas,
         simulation,
         options,
@@ -420,7 +432,9 @@ function loadOptions(wrapper) {
     const testingInterval = parseFloat($(wrapper).find('input[name=testingInterval').val());
     if (testingInterval) { options.testingInterval = testingInterval; }
     const testingRate = parseFloat($(wrapper).find('input[name=testingRate').val()) / 100;
-    if (testingRate) { options.testingRate = testingRate; }
+    console.log("TESTING RATE:" + testingRate);
+    options.testingRate = testingRate;
+    options.selfIsolationRate = 0;
     return options;
 }
 
@@ -431,6 +445,8 @@ function loadOptions(wrapper) {
  * @param {Object} [simulationOptions] - An object containing a subset of simulation options.
  * @param {Object} [visualOptions] - An object containing visualization options.
  * @returns A reference to the `CanvasSimulation` instance created.
+ * TODO: Use a global KV pair to hold the simulation (key = elementId value = simulation).
+ * TODO: Enforce only one simulation per element so no weird behavior when reset hit numerous times. Reset should stop and clear first.
  */
 function makeCanvasAnimation(
     elementId,
@@ -451,11 +467,13 @@ function makeCanvasAnimation(
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    //TODO: BUG!
     let mySimulation;
 
     // Set up controls
     $(wrapper).find('.controls .btn-start').click(function() {
         mySimulation = simulationFactory(
+            wrapper,
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
             { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
@@ -466,6 +484,7 @@ function makeCanvasAnimation(
     $(wrapper).find('.controls .btn-pause').click(function() { mySimulation.toggle(); });
     $(wrapper).find('.controls .btn-reset').click(function() {
         mySimulation = simulationFactory(
+            wrapper,
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
             { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
