@@ -58,7 +58,8 @@ class CanvasSimulation {
     /** How many animation frames equal 1 day of simulation. */
     dayFrameRate = 10;
 
-    constructor(canvas, simulation, opts){
+    constructor(element, canvas, simulation, opts){
+        this.element = element;
         this.simulation = simulation;
         console.log('Building visualization for simulation:', this.simulation);
 
@@ -91,6 +92,11 @@ class CanvasSimulation {
                 radius
             });
         }
+
+        this.susceptibleNumberText = $(element).find("#susceptibleNumber");
+        this.infectedNumberText = $(element).find("#infectedNumber");
+        this.recoveredNumberText = $(element).find("#recoveredNumber");
+        this.deceasedNumberText = $(element).find("#deceasedNumber");
 
         // Ensure methods are bound
         this.runCanvasAnimation = this.runCanvasAnimation.bind(this);
@@ -215,6 +221,12 @@ class CanvasSimulation {
         // The simulation.tick method advances the simulation one tick
         this.tick();
 
+        this.susceptibleNumberText.text(this.simulation.totals.susceptible);
+        this.infectedNumberText.text(this.simulation.totals.infected);
+        this.recoveredNumberText.text(this.simulation.totals.recovered);
+        this.deceasedNumberText.text(this.simulation.totals.deceased);
+
+
         // Re-draw all the actors
         for (let i = 0, l = this.atoms.length; i < l; i++){
             const d = this.atoms[i];
@@ -329,10 +341,11 @@ class CanvasSimulation {
  * @param {*} [options] - Initialization options.
  * @returns A new instance of `CanvasSimulation`.
  */
-const simulationFactory = (canvas, simulationOptions, options) => {
+const simulationFactory = (element, canvas, simulationOptions, options) => {
     const parameters = new SimulationParameters(simulationOptions);
     const simulation = new Simulation(parameters);
     const visualization = new CanvasSimulation(
+        element,
         canvas,
         simulation,
         options
@@ -363,6 +376,8 @@ function loadOptions(wrapper) {
  * @param {Object} [simulationOptions] - An object containing a subset of simulation options.
  * @param {Object} [visualOptions] - An object containing visualization options.
  * @returns A reference to the `CanvasSimulation` instance created.
+ * TODO: Use a global KV pair to hold the simulation (key = elementId value = simulation).
+ * TODO: Enforce only one simulation per element so no weird behavior when reset hit numerous times. Reset should stop and clear first.
  */
 function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = {}) {
     const wrapper = document.getElementById(elementId);
@@ -378,11 +393,13 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    //TODO: BUG!
     let mySimulation;
 
     // Set up controls
     $(wrapper).find('.controls .btn-start').click(function() {
         mySimulation = simulationFactory(
+            wrapper,
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
             { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
@@ -392,6 +409,7 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
     $(wrapper).find('.controls .btn-pause').click(function() { mySimulation.toggle(); });
     $(wrapper).find('.controls .btn-reset').click(function() {
         mySimulation = simulationFactory(
+            wrapper,
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
             { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
