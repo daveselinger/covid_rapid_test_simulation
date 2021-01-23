@@ -49,20 +49,16 @@
 
         <div id="Simulation1">
             <div class="row block sm">
-                <div class="col-3">
+                <div class="col-6">
                     <dl class="stats">
                         <dt>Infected</dt><dd class="infected number">&nbsp;</dd>
                         <dt>Recovered</dt><dd class="recovered number">&nbsp;</dd>
                         <dt>Deceased</dt><dd class="deceased number">&nbsp;</dd>
+                        <dt>Exposures</dt><dd class="exposed number"></dd>
                     </dl>
                 </div>
-                <div class="col-3">
-                    <dl class="stats">
-                        <dt>Total Exposures</dt><dd class="exposed number"></dd>
-                    </dl>
-                </div>
-                <div class="col-6">
-                    <img src="images/color_key_cropped.png" style="width: 100%" alt="Color Key" />
+                <div class="col-6 d-flex">
+                    <img src="images/color_key_plain.png" class="align-self-center" style="width: 100%" alt="Color Key" />
                 </div>
             </div>
             <div class="block">
@@ -89,51 +85,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="block sm">
-            <h2>PCR vs Antigen</h2>
-            <p>This is a public health test, <em>not</em> a diagnostic. The effect is measured in aggregate, not at the individual level.</p>
-        </div>
-
-        <div class="block">
-            
-        </div>
-
-        <div class="block sm">
-            <h2>Perfect The Enemy of Good</h2>
-            <p>A good test now is better than a perfect test next week.</p>
-        </div>
-
-        <div class="block sm">
-            <h2>Accuracy Measured in the Window Where it Matters</h2>
-            <p>Display timeline of infection and symptoms, and test results when the person is actually infectious.</p>
-        </div>
-
-<!--         
-        <div id="Simulation2">
-            <div class="block sm">
-                <dl>
-                    <dt>Infected</dt><dd class="infected number">&nbsp;</dd>
-                    <dt>Recovered</dt><dd class="recovered number">&nbsp;</dd>
-                    <dt>Deceased</dt><dd class="deceased number">&nbsp;</dd>
-                </dl>
-            </div>
-            <div class="block">
-                <div id="Simulation2-Graphic" class="simulation"></div>
-            </div>
-            <div class="block sm">
-                <div class="controls row d-flex align-items-center">
-                    <div class="col">
-                        &nbsp;
-                    </div>
-                    <div class="col text-end">
-                        <button class="btn btn-outline-secondary btn-pause"><i class="i cil-media-pause"></i> Pause</button>
-                        <button class="btn btn-outline-secondary btn-reset"><i class="i cil-reload"></i> Reset</button>
-                        <button class="btn btn-primary btn-start"><i class="i cil-media-play"></i> Start</button>
-                    </div>
-                </div>
-            </div>
-        </div> -->
 
     </div>
 
@@ -171,11 +122,11 @@
                 stats1.infected.innerHTML = sim.totals.infected;
                 stats1.recovered.innerHTML = sim.totals.recovered;
                 stats1.deceased.innerHTML = sim.totals.deceased;
-            },
-            onCollision: function(actor1, actor2) {
-                console.log('Viz: collission!', actor1);
-                if (actor1.status === 1 || actor2.status === 1) { }
+                stats1.exposed.innerHTML = sim.totals.exposures;
             }
+            // onCollision: function(actor1, actor2) {
+            //     if (actor1.status === 1 || actor2.status === 1) { }
+            // }
         }
         makeCanvasAnimation('Simulation1', parameters1, {}, hooks1);
 

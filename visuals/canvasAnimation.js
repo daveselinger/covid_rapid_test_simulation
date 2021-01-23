@@ -60,7 +60,8 @@ class CanvasSimulation {
 
     hooks = {
         onCollision: function() {},
-        onInterval: function() {}
+        onInterval: function() {},
+        onExposure: function() {}
     };
 
     constructor(canvas, simulation, opts, hooks){
@@ -101,10 +102,13 @@ class CanvasSimulation {
             });
         }
 
-        // Ensure methods are bound
-        this.runCanvasAnimation = this.runCanvasAnimation.bind(this);
+        // Ensure methods are bound to correct "this" context.
+        this.runAnimation = this.runAnimation.bind(this);
+        this.generateColor = this.generateColor.bind(this);
+        this.generateColorSpectrum = this.generateColorSpectrum.bind(this);
     }
     
+    /** Adds an atom to the scene. */
     add(datum){
         const d = datum || {};
         d.pos    = d.pos || this.center;
@@ -115,6 +119,105 @@ class CanvasSimulation {
         this.atoms.push(d);
         
         return this;
+    }
+
+    /**
+     * Based on the actor's status, generates a solid color.
+     * @param {Object} actor - the Actor to inspect.
+     */
+    generateColor(actor) {
+        switch(actor.status) {
+            case ACTOR_STATUS.EXPOSED: { return COLORS.YELLOW; }
+            case ACTOR_STATUS.INFECTIOUS: { return COLORS.RED; }
+            case ACTOR_STATUS.RECOVERED: { return COLORS.GREEN; }
+            case ACTOR_STATUS.DECEASED: { return COLORS.NEUTRAL; }
+            default: { return COLORS.BLUE; }
+        }
+    }
+
+    /**
+     * Based on the condition of the actor, returns the appropriate background color as a
+     * (mostly) continuous spectrum.
+     * @param {Object} actor - the Actor to inspect.
+     */
+    generateColorSpectrum(actor) {
+        if (actor.status === ACTOR_STATUS.SUSCEPTIBLE) { return COLORS.BLUE; }
+        if (actor.status === ACTOR_STATUS.RECOVERED) { return COLORS.GREEN; }
+        if (actor.status === ACTOR_STATUS.DECEASED) { return COLORS.NEUTRAL; }
+        
+        // Actor is within the disease progression, generate spectrum of colors
+        const infection = actor.myInfection;
+        // If they're not symptomatic yet, find out what % they are in the "daysToSymptomatic"
+        if (!actor.isSymptomatic) {
+            return COLOR_SPECTRUM.EXPOSED[Math.floor((infection.infectedTime / infection.daysToSymptomatic) * 20)];
+        }
+        // If they're symptomatic, 
+        if (actor.isSymptomatic) {
+            return COLOR_SPECTRUM.INFECTIOUS[Math.floor(((infection.infectedTime - infection.daysToSymptomatic) / infection.durationDaysOfAntigenDetection) * 20)];
+        }
+
+        // Fallback? Should we ever get here?
+        return COLORS.BLUE; 
+    }
+
+    /**
+     * Redraws the canvas with new actor positions and state.
+     */
+    draw() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        // Re-draw all the actors
+        for (let i = 0, l = this.atoms.length; i < l; i++){
+            const d = this.atoms[i];
+            if (this.actorType === 0) {
+                // Is this actor isolating? If so, draw with shield around them.
+                if (this.simulation.actors[i].isolated) {
+                    this.ctx.fillStyle = COLORS.LIGHT;
+                    this.ctx.beginPath();
+                    this.ctx.arc(...d.pos, d.radius + 4, 0, 2 * Math.PI);
+                    this.ctx.fill();
+                }
+
+                // Draw main actor dot with appropriate color
+                this.ctx.beginPath();
+                this.ctx.arc(...d.pos, d.radius, 0, 2 * Math.PI);
+                this.ctx.fillStyle = this.generateColorSpectrum(this.simulation.actors[i]);
+                this.ctx.fill();
+            } else {
+                // Which is the x direction?
+                let actorSprite = sprites.blueGuyRight;
+                if (d.angle > 90 && d.angle < 270) {
+                    switch(this.simulation.actors[i].status) {
+                        case ACTOR_STATUS.EXPOSED:
+                        case ACTOR_STATUS.INFECTIOUS: {
+                            if (this.simulation.actors[i].isolated) {
+                                actorSprite = sprites.redGuyLeftIso;
+                            } else {
+                                actorSprite = sprites.redGuyLeft;
+                            }
+                            break;
+                        }
+                        case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyLeft; break; }
+                        case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyLeft; break; }
+                        default: { actorSprite = sprites.blueGuyLeft; }
+                    }
+                } else {
+                    switch(this.simulation.actors[i].status) {
+                        case ACTOR_STATUS.EXPOSED:
+                        case ACTOR_STATUS.INFECTIOUS: {
+                            if (this.simulation.actors[i].isolated) {
+                                actorSprite = sprites.redGuyRightIso;
+                            } else {
+                                actorSprite = sprites.redGuyRight;
+                            }
+                            break;
+                        }
+                        case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyRight; break; }
+                        case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyRight; break; }
+                    }
+                }
+                this.ctx.drawImage(actorSprite, ...d.pos, 20, 27);
+            }
+        }
     }
     
     tick(){
@@ -149,12 +252,14 @@ class CanvasSimulation {
                         && !actor2.isolated
                     ) {
                         actor2.infect();
+                        this.hooks.onExposure();
                     } else if (actor2.status === ACTOR_STATUS.INFECTIOUS
                         && actor1.status === ACTOR_STATUS.SUSCEPTIBLE
                         && !actor1.isolated
                         && !actor2.isolated
                     ) {
                         actor1.infect();
+                        this.hooks.onExposure();
                     }
 
                     // To avoid having them stick to each other,
@@ -226,73 +331,14 @@ class CanvasSimulation {
     /**
      * Begins the animation and starts the animation frame request.
      */
-    runCanvasAnimation() {
+    runAnimation() {
         if (!this.running) { return; }
-        requestAnimationFrame(this.runCanvasAnimation);
-        this.ctx.clearRect(0, 0, this.width, this.height);
+        requestAnimationFrame(this.runAnimation);
 
         // The simulation.tick method advances the simulation one tick
         this.tick();
 
-        // Re-draw all the actors
-        for (let i = 0, l = this.atoms.length; i < l; i++){
-            const d = this.atoms[i];
-            if (this.actorType === 0) {
-                // Is this actor isolating? If so, draw with shield around them.
-                if (this.simulation.actors[i].isolated) {
-                    this.ctx.fillStyle = COLORS.LIGHT;
-                    this.ctx.beginPath();
-                    this.ctx.arc(...d.pos, d.radius + 4, 0, 2 * Math.PI);
-                    this.ctx.fill();
-                }
-
-                // Draw main actor dot with appropriate color
-                this.ctx.beginPath();
-                this.ctx.arc(...d.pos, d.radius, 0, 2 * Math.PI);
-                switch(this.simulation.actors[i].status) {
-                    case ACTOR_STATUS.EXPOSED: { this.ctx.fillStyle = COLORS.YELLOW; break; }
-                    case ACTOR_STATUS.INFECTIOUS: { this.ctx.fillStyle = COLORS.RED; break; }
-                    case ACTOR_STATUS.RECOVERED: { this.ctx.fillStyle = COLORS.GREEN; break; }
-                    case ACTOR_STATUS.DECEASED: { this.ctx.fillStyle = COLORS.DARK; break; }
-                    default: { this.ctx.fillStyle = COLORS.BLUE; }
-                }
-                this.ctx.fill();
-            } else {
-                // Which is the x direction?
-                let actorSprite = sprites.blueGuyRight;
-                if (d.angle > 90 && d.angle < 270) {
-                    switch(this.simulation.actors[i].status) {
-                        case ACTOR_STATUS.EXPOSED:
-                        case ACTOR_STATUS.INFECTIOUS: {
-                            if (this.simulation.actors[i].isolated) {
-                                actorSprite = sprites.redGuyLeftIso;
-                            } else {
-                                actorSprite = sprites.redGuyLeft;
-                            }
-                            break;
-                        }
-                        case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyLeft; break; }
-                        case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyLeft; break; }
-                        default: { actorSprite = sprites.blueGuyLeft; }
-                    }
-                } else {
-                    switch(this.simulation.actors[i].status) {
-                        case ACTOR_STATUS.EXPOSED:
-                        case ACTOR_STATUS.INFECTIOUS: {
-                            if (this.simulation.actors[i].isolated) {
-                                actorSprite = sprites.redGuyRightIso;
-                            } else {
-                                actorSprite = sprites.redGuyRight;
-                            }
-                            break;
-                        }
-                        case ACTOR_STATUS.RECOVERED: { actorSprite = sprites.greenGuyRight; break; }
-                        case ACTOR_STATUS.DECEASED: { actorSprite = sprites.neutralGuyRight; break; }
-                    }
-                }
-                this.ctx.drawImage(actorSprite, ...d.pos, 20, 27);
-            }
-        }
+        this.draw();
     }
 
     toggleActorDisplay() {
@@ -308,7 +354,7 @@ class CanvasSimulation {
             this.frameCount = 0;
             this.started = true;
             this.running = true;
-            this.runCanvasAnimation();
+            this.runAnimation();
         }
     }
 
@@ -320,7 +366,7 @@ class CanvasSimulation {
     resume() {
         if (this.started && !this.running) {
             this.running = true;
-            this.runCanvasAnimation();
+            this.runAnimation();
         }
     }
 
