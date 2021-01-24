@@ -12,6 +12,7 @@ const COLORS = {
     REALLY_DRK: '#0F2C44',
     LIGHT:      '#E4E7EB',
     XLIGHT:     '#F5F6F7',
+    WHITE:      '#FFF',
 
     // Neutral scale
     N1:  '#F9F9FB',
