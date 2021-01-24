@@ -58,10 +58,16 @@ class CanvasSimulation {
     /** How many animation frames equal 1 day of simulation. */
     dayFrameRate = 10;
 
-    constructor(element, canvas, simulation, opts){
-        this.element = element;
+    hooks = {
+        onCollision: function() {},
+        onInterval: function() {},
+        onExposure: function() {}
+    };
+
+    constructor(wrapperElement, canvas, simulation, opts, hooks){
+        this.wrapperElement = wrapperElement;
         this.simulation = simulation;
-        console.log('Building visualization for simulation:', this.simulation);
+        console.log('Building visualization for simulation:', this.simulation, hooks);
 
         // Set up canvas
         this.canvas = canvas;
@@ -75,6 +81,10 @@ class CanvasSimulation {
             : 0;
 
         this.frameCount = 0;
+
+        // Set up event hooks
+        if (hooks && hooks.onInterval) { this.hooks.onInterval = hooks.onInterval; }
+        if (hooks && hooks.onCollision) { this.hooks.onCollision = hooks.onCollision; }
 
         // Add all the actors for this simulation
         const populationSize = simulation.simulationParameters.populationSize;
@@ -93,15 +103,18 @@ class CanvasSimulation {
             });
         }
 
-        this.susceptibleNumberText = $(element).find("#susceptibleNumber");
-        this.infectedNumberText = $(element).find("#infectedNumber");
-        this.recoveredNumberText = $(element).find("#recoveredNumber");
-        this.deceasedNumberText = $(element).find("#deceasedNumber");
+        this.susceptibleNumberText = $(wrapperElement).find("#susceptibleNumber");
+        this.infectedNumberText = $(wrapperElement).find("#infectedNumber");
+        this.recoveredNumberText = $(wrapperElement).find("#recoveredNumber");
+        this.deceasedNumberText = $(wrapperElement).find("#deceasedNumber");
 
-        // Ensure methods are bound
-        this.runCanvasAnimation = this.runCanvasAnimation.bind(this);
+        // Ensure methods are bound to correct "this" context.
+        this.runAnimation = this.runAnimation.bind(this);
+        this.generateColor = this.generateColor.bind(this);
+        this.generateColorSpectrum = this.generateColorSpectrum.bind(this);
     }
     
+    /** Adds an atom to the scene. */
     add(datum){
         const d = datum || {};
         d.pos    = d.pos || this.center;
@@ -113,120 +126,51 @@ class CanvasSimulation {
         
         return this;
     }
-    
-    tick(){
-        this.frameCount++;
-        const numberOfAtoms = this.atoms.length;
-        for (let i = 0; i < numberOfAtoms; i++){
-            const atom = this.atoms[i];
-            atom.collided = false;
 
-            // Check through other nodes to detect collisions
-            for (let j = 0; j < numberOfAtoms; j++){
-                const atom0 = this.atoms[j];
-                atom0.collided = false;
-
-                // Collision!
-                if (i !== j
-                    && geometric.lineLength([atom.pos, atom0.pos]) < atom.radius + atom0.radius
-                    && !atom.collided
-                    && !atom0.collided
-                ) {
-
-                    // Call simulation model to check if there is a transmission...
-                    const actor1 = this.simulation.actors[i];
-                    const actor2 = this.simulation.actors[j];
-                    // If either of the actors is infections, and neither are isolated, there is a
-                    // possible transmission event.
-                    if (actor1.status === ACTOR_STATUS.INFECTIOUS
-                        && actor2.status === ACTOR_STATUS.SUSCEPTIBLE
-                        && !actor1.isolated
-                        && !actor2.isolated
-                    ) {
-                        actor2.infect();
-                    } else if (actor2.status === ACTOR_STATUS.INFECTIOUS
-                        && actor1.status === ACTOR_STATUS.SUSCEPTIBLE
-                        && !actor1.isolated
-                        && !actor2.isolated
-                    ) {
-                        actor1.infect();
-                    }
-
-                    // To avoid having them stick to each other,
-                    // test if moving them in each other's angles will bring them closer or farther apart
-                    // NOTE: Is this slow and unnecessary? Can we use a simpler function to handle "bounce"?
-                    const keep = geometric.lineLength([
-                        geometric.pointTranslate(atom.pos, atom.angle, atom.speed),
-                        geometric.pointTranslate(atom0.pos, atom0.angle, atom0.speed)
-                    ]);
-                    const swap = geometric.lineLength([
-                        geometric.pointTranslate(atom.pos, atom0.angle, atom0.speed),
-                        geometric.pointTranslate(atom0.pos, atom.angle, atom.speed)
-                    ]);
-
-                    if (keep < swap) {
-                        const newAngle = atom.angle;
-                        const newSpeed = atom.speed;
-                        atom.angle     = atom0.angle;
-                        atom.speed     = atom0.speed;
-                        atom0.angle    = newAngle;
-                        atom0.speed    = newSpeed;
-                        atom.collided  = true;
-                        atom0.collided = true;
-                    }
-
-                    break;
-                }
-            }
-
-            // Detect sides
-            const wallVertical   = (atom.pos[0] <= atom.radius || atom.pos[0] >= this.width - atom.radius);
-            const wallHorizontal = (atom.pos[1] <= atom.radius || atom.pos[1] >= this.height - atom.radius);
-
-            if (wallVertical || wallHorizontal) {
-                // Is it moving more towards the middle or away from it?
-                const t0 = geometric.pointTranslate(atom.pos, atom.angle, atom.speed);
-                const l0 = geometric.lineLength([this.center, t0]);
-
-                const reflected = geometric.angleReflect(atom.angle, wallVertical ? 90 : 0);
-                const t1 = geometric.pointTranslate(atom.pos, reflected, atom.speed);
-                const l1 = geometric.lineLength([this.center, t1]);
-
-                if (l1 < l0) { atom.angle = reflected; }
-            }
-
-            // Only translate the actor's position if they're moving (e.g. not deceased and not isolating).
-            const actorStatus = this.simulation.actors[i].status;
-            const isActorIsolated = this.simulation.actors[i].isolated;
-            if (actorStatus !== ACTOR_STATUS.DECEASED
-                && (!isActorIsolated)
-            ) {
-                atom.pos = geometric.pointTranslate(atom.pos, atom.angle, atom.speed);
-            }
+    /**
+     * Based on the actor's status, generates a solid color.
+     * @param {Object} actor - the Actor to inspect.
+     */
+    generateColor(actor) {
+        switch(actor.status) {
+            case ACTOR_STATUS.EXPOSED: { return COLORS.YELLOW; }
+            case ACTOR_STATUS.INFECTIOUS: { return COLORS.RED; }
+            case ACTOR_STATUS.RECOVERED: { return COLORS.GREEN; }
+            case ACTOR_STATUS.DECEASED: { return COLORS.NEUTRAL; }
+            default: { return COLORS.BLUE; }
         }
-
-        // Each frame of the animation = 1/20th (or config) of a day
-        this.simulation.tickRapidTesting(1.0/this.dayFrameRate);
-        this.simulation.tickDisease(1.0/this.dayFrameRate);
     }
 
     /**
-     * Begins the animation and starts the animation frame request.
+     * Based on the condition of the actor, returns the appropriate background color as a
+     * (mostly) continuous spectrum.
+     * @param {Object} actor - the Actor to inspect.
      */
-    runCanvasAnimation() {
-        if (!this.running) { return; }
-        requestAnimationFrame(this.runCanvasAnimation);
+    generateColorSpectrum(actor) {
+        if (actor.status === ACTOR_STATUS.SUSCEPTIBLE) { return COLORS.BLUE; }
+        if (actor.status === ACTOR_STATUS.RECOVERED) { return COLORS.GREEN; }
+        if (actor.status === ACTOR_STATUS.DECEASED) { return COLORS.NEUTRAL; }
+        
+        // Actor is within the disease progression, generate spectrum of colors
+        const infection = actor.myInfection;
+        // If they're not symptomatic yet, find out what % they are in the "daysToSymptomatic"
+        if (!actor.isSymptomatic) {
+            return COLOR_SPECTRUM.EXPOSED[Math.floor((infection.infectedTime / infection.daysToSymptomatic) * 20)];
+        }
+        // If they're symptomatic, 
+        if (actor.isSymptomatic) {
+            return COLOR_SPECTRUM.INFECTIOUS[Math.floor(((infection.infectedTime - infection.daysToSymptomatic) / infection.durationDaysOfAntigenDetection) * 20)];
+        }
+
+        // Fallback? Should we ever get here?
+        return COLORS.BLUE; 
+    }
+
+    /**
+     * Redraws the canvas with new actor positions and state.
+     */
+    draw() {
         this.ctx.clearRect(0, 0, this.width, this.height);
-
-        // The simulation.tick method advances the simulation one tick
-        this.tick();
-
-        this.susceptibleNumberText.text(this.simulation.totals.susceptible);
-        this.infectedNumberText.text(this.simulation.totals.infected);
-        this.recoveredNumberText.text(this.simulation.totals.recovered);
-        this.deceasedNumberText.text(this.simulation.totals.deceased);
-
-
         // Re-draw all the actors
         for (let i = 0, l = this.atoms.length; i < l; i++){
             const d = this.atoms[i];
@@ -242,13 +186,7 @@ class CanvasSimulation {
                 // Draw main actor dot with appropriate color
                 this.ctx.beginPath();
                 this.ctx.arc(...d.pos, d.radius, 0, 2 * Math.PI);
-                switch(this.simulation.actors[i].status) {
-                    case ACTOR_STATUS.EXPOSED: { this.ctx.fillStyle = COLORS.YELLOW; break; }
-                    case ACTOR_STATUS.INFECTIOUS: { this.ctx.fillStyle = COLORS.RED; break; }
-                    case ACTOR_STATUS.RECOVERED: { this.ctx.fillStyle = COLORS.GREEN; break; }
-                    case ACTOR_STATUS.DECEASED: { this.ctx.fillStyle = COLORS.DARK; break; }
-                    default: { this.ctx.fillStyle = COLORS.BLUE; }
-                }
+                this.ctx.fillStyle = this.generateColorSpectrum(this.simulation.actors[i]);
                 this.ctx.fill();
             } else {
                 // Which is the x direction?
@@ -286,6 +224,132 @@ class CanvasSimulation {
                 this.ctx.drawImage(actorSprite, ...d.pos, 20, 27);
             }
         }
+
+        this.susceptibleNumberText.text(this.simulation.totals.susceptible);
+        this.infectedNumberText.text(this.simulation.totals.infected);
+        this.recoveredNumberText.text(this.simulation.totals.recovered);
+        this.deceasedNumberText.text(this.simulation.totals.deceased);
+    }
+    
+    tick(){
+        this.frameCount++;
+        const numberOfAtoms = this.atoms.length;
+        for (let i = 0; i < numberOfAtoms; i++){
+            const atom = this.atoms[i];
+            atom.collided = false;
+
+            // Check through other nodes to detect collisions
+            for (let j = 0; j < numberOfAtoms; j++){
+                const atom0 = this.atoms[j];
+                atom0.collided = false;
+
+                // Collision!
+                const atomShieldRadius = this.simulation.actors[i].isolated ? 4 : 0;
+                const atom0ShieldRadius = this.simulation.actors[j].isolated ? 4 : 0;
+                if (i !== j
+                    && geometric.lineLength([atom.pos, atom0.pos]) < (atom.radius + atom0.radius + atomShieldRadius + atom0ShieldRadius)
+                    && !atom.collided
+                    && !atom0.collided
+                ) {
+
+                    // Call simulation model to check if there is a transmission...
+                    const actor1 = this.simulation.actors[i];
+                    const actor2 = this.simulation.actors[j];
+                    // If either of the actors is infections, and neither are isolated, there is a
+                    // possible transmission event.
+                    if (actor1.status === ACTOR_STATUS.INFECTIOUS
+                        && actor2.status === ACTOR_STATUS.SUSCEPTIBLE
+                        && !actor1.isolated
+                        && !actor2.isolated
+                    ) {
+                        actor2.infect();
+                        this.hooks.onExposure();
+                    } else if (actor2.status === ACTOR_STATUS.INFECTIOUS
+                        && actor1.status === ACTOR_STATUS.SUSCEPTIBLE
+                        && !actor1.isolated
+                        && !actor2.isolated
+                    ) {
+                        actor1.infect();
+                        this.hooks.onExposure();
+                    }
+
+                    // To avoid having them stick to each other,
+                    // test if moving them in each other's angles will bring them closer or farther apart
+                    // NOTE: Is this slow and unnecessary? Can we use a simpler function to handle "bounce"?
+                    const keep = geometric.lineLength([
+                        geometric.pointTranslate(atom.pos, atom.angle, atom.speed),
+                        geometric.pointTranslate(atom0.pos, atom0.angle, atom0.speed)
+                    ]);
+                    const swap = geometric.lineLength([
+                        geometric.pointTranslate(atom.pos, atom0.angle, atom0.speed),
+                        geometric.pointTranslate(atom0.pos, atom.angle, atom.speed)
+                    ]);
+
+                    if (keep < swap) {
+                        const newAngle = atom.angle;
+                        const newSpeed = atom.speed;
+                        atom.angle     = atom0.angle;
+                        atom.speed     = atom0.speed;
+                        atom0.angle    = newAngle;
+                        atom0.speed    = newSpeed;
+                        atom.collided  = true;
+                        atom0.collided = true;
+                    }
+
+                    // Post collision event, call hook
+                    this.hooks.onCollision(actor1, actor2);
+
+                    break;
+                }
+            }
+
+            // Detect sides
+            const wallVertical   = (atom.pos[0] <= atom.radius || atom.pos[0] >= this.width - atom.radius);
+            const wallHorizontal = (atom.pos[1] <= atom.radius || atom.pos[1] >= this.height - atom.radius);
+
+            if (wallVertical || wallHorizontal) {
+                // Is it moving more towards the middle or away from it?
+                const t0 = geometric.pointTranslate(atom.pos, atom.angle, atom.speed);
+                const l0 = geometric.lineLength([this.center, t0]);
+
+                const reflected = geometric.angleReflect(atom.angle, wallVertical ? 90 : 0);
+                const t1 = geometric.pointTranslate(atom.pos, reflected, atom.speed);
+                const l1 = geometric.lineLength([this.center, t1]);
+
+                if (l1 < l0) { atom.angle = reflected; }
+            }
+
+            // Only translate the actor's position if they're moving (e.g. not deceased and not isolating).
+            const actorStatus = this.simulation.actors[i].status;
+            const isActorIsolated = this.simulation.actors[i].isolated;
+            if (actorStatus !== ACTOR_STATUS.DECEASED
+                && (!isActorIsolated)
+            ) {
+                atom.pos = geometric.pointTranslate(atom.pos, atom.angle, atom.speed);
+            }
+        }
+
+        // Each frame of the animation = 1/20th (or config) of a day
+        this.simulation.tickRapidTesting(1.0/this.dayFrameRate);
+        this.simulation.tickDisease(1.0/this.dayFrameRate);
+
+        // Each day that passes, call the onInterval hook
+        if (this.frameCount % this.dayFrameRate === 0) {
+            this.hooks.onInterval(this.simulation);
+        }
+    }
+
+    /**
+     * Begins the animation and starts the animation frame request.
+     */
+    runAnimation() {
+        if (!this.running) { return; }
+        this.animationFrame = requestAnimationFrame(this.runAnimation);
+
+        // The simulation.tick method advances the simulation one tick
+        this.tick();
+
+        this.draw();
     }
 
     toggleActorDisplay() {
@@ -301,19 +365,27 @@ class CanvasSimulation {
             this.frameCount = 0;
             this.started = true;
             this.running = true;
-            this.runCanvasAnimation();
+            this.runAnimation();
         }
+    }
+
+    stop() {
+        this.started = false;
+        this.running = false;
+        cancelAnimationFrame(this.animationFrame);
+        this.ctx.clearRect(0, 0, this.width, this.height);
     }
 
     pause() {
         if (!this.started) { return; }
         this.running = false;
+        cancelAnimationFrame(this.animationFrame);
     }
 
     resume() {
         if (this.started && !this.running) {
             this.running = true;
-            this.runCanvasAnimation();
+            this.runAnimation();
         }
     }
 
@@ -341,19 +413,24 @@ class CanvasSimulation {
  * @param {*} [options] - Initialization options.
  * @returns A new instance of `CanvasSimulation`.
  */
-const simulationFactory = (element, canvas, simulationOptions, options) => {
+const simulationFactory = (element, canvas, simulationOptions, options, hooks) => {
     const parameters = new SimulationParameters(simulationOptions);
     const simulation = new Simulation(parameters);
     const visualization = new CanvasSimulation(
         element,
         canvas,
         simulation,
-        options
+        options,
+        hooks
     );
 
     return visualization;
 };
 
+/**
+ * Checks DOM elements for input and returns an updated options object.
+ * @param {DOM} wrapper - The wrapper DOM element for the graphic.
+ */
 function loadOptions(wrapper) {
     const options = {};
     const populationSize = parseInt($(wrapper).find('input[name=populationSize').val(), 10);
@@ -379,7 +456,12 @@ function loadOptions(wrapper) {
  * TODO: Use a global KV pair to hold the simulation (key = elementId value = simulation).
  * TODO: Enforce only one simulation per element so no weird behavior when reset hit numerous times. Reset should stop and clear first.
  */
-function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = {}) {
+function makeCanvasAnimation(
+    elementId,
+    simulationOptions = {},
+    visualOptions = {},
+    hooks = {}
+) {
     const wrapper = document.getElementById(elementId);
     const graphic = document.getElementById(`${elementId}-Graphic`);
     const canvas = document.createElement('canvas');
@@ -402,19 +484,22 @@ function makeCanvasAnimation(elementId, simulationOptions = {}, visualOptions = 
             wrapper,
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
-            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
+            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
+            hooks
         );
         mySimulation.start();
     });
     $(wrapper).find('.controls .btn-pause').click(function() { mySimulation.toggle(); });
     $(wrapper).find('.controls .btn-reset').click(function() {
+        mySimulation.stop();
         mySimulation = simulationFactory(
             wrapper,
             canvas,
             { ...simulationOptions, ...loadOptions(wrapper) },
-            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight }
+            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
+            hooks
         );
-        mySimulation.start();
+        // mySimulation.start();
     });
     $(wrapper).find('.controls .btn-toggleActor').click(function() { mySimulation.toggleActorDisplay(); });
 

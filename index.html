@@ -43,18 +43,24 @@
     <div class="container-md">
 
         <div class="block sm">
-            <h1>Simulation testing.</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <h1>COVID Visual Simulation</h1>
+            <p>This is a visual simulation to communicate the spread of COVID among a population, and the power of isolation in controlling spread.</p>
         </div>
 
         <div id="Simulation1">
-            <div class="block sm">
-                <dl>
-                    <dt>Susceptible</dt><dd id="susceptibleNumber" class="susceptible number">0</dd>
-                    <dt>Infected</dt><dd id="infectedNumber" class="infected number">0</dd>
-                    <dt>Recovered</dt><dd id="recoveredNumber" class="recovered number">0</dd>
-                    <dt>Deceased</dt><dd id="deceasedNumber" class="deceased number">0</dd>
-                </dl>
+            <div class="row block sm">
+                <div class="col-6">
+                    <dl class="stats">
+                        <dt>Susceptible</dt><dd id="susceptibleNumber" class="susceptible number">0</dd>
+                        <dt>Infected</dt><dd id="infectedNumber" class="infected number">0</dd>
+                        <dt>Recovered</dt><dd id="recoveredNumber" class="recovered number">0</dd>
+                        <dt>Deceased</dt><dd id="deceasedNumber" class="deceased number">0</dd>
+                        <dt>Exposures</dt><dd class="exposed number"></dd>
+                    </dl>
+                </div>
+                <div class="col-6 d-flex">
+                    <img src="images/color_key_plain.png" class="align-self-center" style="width: 100%" alt="Color Key" />
+                </div>
             </div>
             <div class="block">
                 <div id="Simulation1-Graphic" class="simulation"></div>
@@ -81,34 +87,11 @@
             </div>
         </div>
 
-        <div id="Simulation2">
-            <div class="block sm">
-                <dl>
-                    <dt>Infected</dt><dd id="infectedNumber" class="infected number">&nbsp;</dd>
-                    <dt>Recovered</dt><dd id="recoveredNumber" class="recovered number">&nbsp;</dd>
-                    <dt>Deceased</dt><dd id="deceasedNumber" class="deceased number">&nbsp;</dd>
-                </dl>
-            </div>
-            <div class="block">
-                <div id="Simulation2-Graphic" class="simulation"></div>
-            </div>
-            <div class="block sm">
-                <div class="controls row d-flex align-items-center">
-                    <div class="col">
-                        &nbsp;
-                    </div>
-                    <div class="col text-end">
-                        <button class="btn btn-outline-secondary btn-pause"><i class="i cil-media-pause"></i> Pause</button>
-                        <button class="btn btn-outline-secondary btn-reset"><i class="i cil-reload"></i> Reset</button>
-                        <button class="btn btn-primary btn-start"><i class="i cil-media-play"></i> Start</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <footer>&nbsp;</footer>
+    <footer>
+        <span class="text-muted">Made in USA &#9733;</span>
+    </footer>
 </body>
 
 <!-- External -->
@@ -129,13 +112,30 @@
             populationSize: 200,
             startingInfectionRate: 0.2
         });
-        makeCanvasAnimation('Simulation1', parameters1);
+        const stats1 = {
+            infected: $('#Simulation1 .stats .infected')[0],
+            recovered: $('#Simulation1 .stats .recovered')[0],
+            deceased: $('#Simulation1 .stats .deceased')[0],
+            exposed: $('#Simulation1 .stats .exposed')[0]
+        }
+        const hooks1 = {
+            onInterval: function(sim) {
+                stats1.infected.innerHTML = sim.totals.infected;
+                stats1.recovered.innerHTML = sim.totals.recovered;
+                stats1.deceased.innerHTML = sim.totals.deceased;
+                stats1.exposed.innerHTML = sim.totals.exposures;
+            }
+            // onCollision: function(actor1, actor2) {
+            //     if (actor1.status === 1 || actor2.status === 1) { }
+            // }
+        }
+        makeCanvasAnimation('Simulation1', parameters1, {}, hooks1);
 
-        const parameters2 = new SimulationParameters({
-            populationSize: 500,
-            startingInfectionRate: 0.5
-        });
-        makeCanvasAnimation('Simulation2', parameters2);
+        // const parameters2 = new SimulationParameters({
+        //     populationSize: 500,
+        //     startingInfectionRate: 0.5
+        // });
+        // makeCanvasAnimation('Simulation2', parameters2);
     };
 </script>
 
