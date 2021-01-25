@@ -104,9 +104,22 @@
     setupForm('boop');
     setupForm('boop_badoop');
 
+    let simulation_display;
+
     function runSimulation(line_chart_element, parameters) {
-        simulation_display = new SimulationDisplay(line_chart_element, parameters, 500);
-        simulation_display.start();
+        if (simulation_display) {
+            old_simulation_display = simulation_display;
+            old_simulation_display.stop();
+
+            simulation_display = new SimulationDisplay(parameters, 500);
+            simulation_display.getChart(old_simulation_display);
+            simulation_display.resetData();
+            simulation_display.start();
+        } else {
+            simulation_display = new SimulationDisplay(parameters, 500);
+            simulation_display.initChart (line_chart_element);
+            simulation_display.start();
+        }
     }
 
 </script>
