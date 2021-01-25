@@ -480,6 +480,9 @@ function makeCanvasAnimation(
 
     // Set up controls
     $(wrapper).find('.controls .btn-start').click(function() {
+        if (mySimulation) {
+            mySimulation.stop();
+        }
         mySimulation = simulationFactory(
             wrapper,
             canvas,
@@ -489,16 +492,22 @@ function makeCanvasAnimation(
         );
         mySimulation.start();
     });
-    $(wrapper).find('.controls .btn-pause').click(function() { mySimulation.toggle(); });
+    $(wrapper).find('.controls .btn-pause').click(function() { 
+        if (mySimulation) {
+            mySimulation.toggle(); 
+        }
+    });
     $(wrapper).find('.controls .btn-reset').click(function() {
-        mySimulation.stop();
-        mySimulation = simulationFactory(
-            wrapper,
-            canvas,
-            { ...simulationOptions, ...loadOptions(wrapper) },
-            { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
-            hooks
-        );
+        if (mySimulation) {
+            mySimulation.stop();
+        }
+        // mySimulation = simulationFactory(
+        //     wrapper,
+        //     canvas,
+        //     { ...simulationOptions, ...loadOptions(wrapper) },
+        //     { ...visualOptions, width: graphic.clientWidth, height: graphic.clientHeight },
+        //     hooks
+        // );
         // mySimulation.start();
     });
     $(wrapper).find('.controls .btn-toggleActor').click(function() { mySimulation.toggleActorDisplay(); });
