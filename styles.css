@@ -16,6 +16,13 @@
     border: solid 1px #ccc;
 }
 
+.horizontal-graph {
+    display: block;
+    margin: 36px auto;
+    width: 1000px;
+    height: 220px;
+}
+
 .number {
     font-family: monospace;
     font-size: 1.4rem;
@@ -40,6 +47,10 @@ dd {
 }
 
 .btn .i { font-size: .8rem; }
+
+/* CONTROLS */
+
+.controls input { min-width: 5rem; }
 
 
 /* FOOTER */
