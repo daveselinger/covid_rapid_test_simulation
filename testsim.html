@@ -7,7 +7,13 @@
 
 <div id=base_form style="width: 100%; height: 100%">
     <canvas id="line_chart"></canvas>
-   Starting parameters <br/>
+   Rapid Testing Parameters <br />
+   Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
+   Percent of population testing <input type=text id=testing_rate value=0.6 /><br/>
+   <input id="testing_rate_slider" type="range" min="0" max="100" step="1"  style="display:none">
+
+   <div id="advancedParameters" style="display:none" >
+   <br>Advance Parameters<br>
    Population <input id=population_size type=text value=10000 /><br/>
    Initial Infected Pct <input type=text id=initial_infected value=0.004 /><br/>
    Self-isolating symptomatic (with or without test) <input type=text id=self_isolation_rate value=0.1><br />
@@ -16,8 +22,6 @@
    Daily interactions (STD) <input type=text id=num_interactions_std value=0.02><br />
 
    Rapid Testing Parameters <br />
-   Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
-   Percent of population testing <input type=text id=testing_rate value=0.6 /><br/>
    False Positive percent <input type=text id=false_positive value=0.01 /><br/>
    False Negative percent <input type=text id=false_negative value="0.02" /><br/>
 
@@ -29,7 +33,8 @@
    Mortality Rate <input type=text id=mortality_rate value=0.01 /><br/>
    Asymptomatic Rate <input type=text id=asymptomatic_rate value=0.2 /><br/>
    Recovered Resistance <input type=text id=recovered_resistance value=0.98 /><br/>
-
+    </div>
+    <button id="advancedParametersButton">Toggle Advanced</button>
    <button id="run_simulation">Run Simulation</button>
 </div>
 
@@ -73,40 +78,78 @@
             // console.log(parameters.populationSize);
         return parameters;
     }
-
+    function toggleElement(name) {
+        var x = document.getElementById( name );
+        if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+    }
     function setupForm(form_name) {
         base_form = base_form;
         new_form = base_form.cloneNode(true); ;
         new_form.setAttribute('id', form_name + "_form");
         child_elements = new_form.children;
-        for (cur_element of child_elements) {
-            if (cur_element.id == null || cur_element.id == "") {
-                continue;
+        function iterateRename(child_elements) {
+            for (cur_element of child_elements) {
+                if (cur_element.id == null || cur_element.id == "") {
+                    continue;
+                }
+                cur_element.setAttribute('id', form_name + "_" + cur_element.id );
+                if(cur_element.children.length>0) {
+                    iterateRename(cur_element.children)
+                }
             }
-
-            console.log(cur_element.id);
-            cur_element.setAttribute('id', form_name + "_" + cur_element.id );
-            console.log(cur_element.id);
         }
+        iterateRename(child_elements);
 
         new_form.style.display = 'block';
 
         base_form.parentNode.insertBefore(new_form, base_form.nextSibling);
 
+        line_chart_element = document.getElementById(form_name + "_line_chart");        
+
+        let simulation_display;
+
         document.getElementById(form_name + '_run_simulation').addEventListener('click', function() {
             parameters = getFormParameters(form_name);
-            
             line_chart_element = document.getElementById(form_name + "_line_chart");
-            runSimulation(line_chart_element, parameters);
+            simulation_display=runSimulation(simulation_display,line_chart_element,parameters);
+        });
+        document.getElementById(form_name + '_advancedParametersButton').addEventListener('click', function() {
+            toggleElement(form_name + "_advancedParameters");
+        });
+        document.getElementById(form_name + '_testing_rate_slider').addEventListener('change', function() {
+            testingRate = parseFloat(document.getElementById(form_name + "_" + 'testing_rate_slider').value)/100.0;
+            document.getElementById(form_name + "_" + 'testing_rate').value=testingRate;
+            parameters = getFormParameters(form_name);
+            line_chart_element = document.getElementById(form_name + "_line_chart");
+            console.log("Fast run simulation test.");
+            simulation_display=runSimulation(simulation_display,line_chart_element,parameters,0);
         });
     }
 
     setupForm('boop');
     setupForm('boop_badoop');
 
-    function runSimulation(line_chart_element, parameters) {
-        simulation_display = new SimulationDisplay(line_chart_element, parameters, 500);
-        simulation_display.start();
+
+
+    function runSimulation(simulation_display,line_chart_element, parameters,timeout=5) {
+        if (simulation_display) {
+            old_simulation_display = simulation_display;
+            old_simulation_display.stop();
+
+            simulation_display = new SimulationDisplay(parameters, 500);
+            simulation_display.getChart(old_simulation_display);
+            simulation_display.resetData();
+            simulation_display.start(timeout);
+        } else {
+            simulation_display = new SimulationDisplay(parameters, 500);
+            simulation_display.initChart (line_chart_element);
+            simulation_display.start(timeout);
+        }
+        return simulation_display;
     }
 
 </script>
