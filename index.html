@@ -69,13 +69,13 @@
                 <div class="controls row d-flex align-items-center">
                     <div class="col">
                         <strong>Population:</strong>
-                        <input type="number" name="populationSize" value="200" min="50" max="2000" /><br/>
+                        <input type="number" name="populationSize" size="6" value="200" min="50" max="2000" /><br/>
                         <strong>Infected:</strong>
-                        <input type="number" name="startingInfectionRate" value="3" min="1" max="99" />%<br/>
+                        <input type="number" name="startingInfectionRate" size="6" value="3" min="1" max="99" />%<br/>
                         <strong>Rapid testing interval (days):</strong>
-                        <input type="number" name="testingInterval" value="3" min="1" max="200" /><br/>
+                        <input type="number" name="testingInterval" size="6" value="3" min="1" max="200" /><br/>
                         <strong>Population testing:</strong>
-                        <input type="number" name="testingRate" value="60" min="0" max="99" />%<br/>
+                        <input type="number" name="testingRate" size="6" value="60" min="0" max="99" />%<br/>
                     </div>
                     <div class="col text-end">
                         <button class="btn btn-outline-secondary btn-toggleActor"> Dots</button>
@@ -84,6 +84,9 @@
                         <button class="btn btn-primary btn-start"><i class="i cil-media-play"></i> Start</button>
                     </div>
                 </div>
+            </div>
+            <div class="block">
+                <div id="Simulation1-AreaGraph" class="horizontal-graph"></div>
             </div>
         </div>
 
@@ -97,7 +100,7 @@
 <!-- External -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" type="text/javascript" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" type="text/javascript"></script>
-<script src="https://d3js.org/d3.v3.js" type="text/javascript"></script>
+<script src="https://d3js.org/d3.v6.js" type="text/javascript"></script>
 <script src="https://unpkg.com/geometric@2/build/geometric.min.js" type="text/javascript"></script>
 
 <!-- Main COVID simulation -->
@@ -105,6 +108,7 @@
 
 <!-- Visualizations -->
 <script src="./visuals/common.js" type="text/javascript"></script>
+<script src="./visuals/areaGraph.js" type="text/javascript"></script>
 <script src="./visuals/canvasAnimation.js" type="text/javascript"></script>
 <script>
     window.onload = function () {

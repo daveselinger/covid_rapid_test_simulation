@@ -64,7 +64,7 @@ class CanvasSimulation {
         onExposure: function() {}
     };
 
-    constructor(wrapperElement, canvas, simulation, opts, hooks){
+    constructor(wrapperElement, canvas, simulation, opts, hooks) {
         this.wrapperElement = wrapperElement;
         this.simulation = simulation;
         console.log('Building visualization for simulation:', this.simulation, hooks);
@@ -102,11 +102,6 @@ class CanvasSimulation {
                 radius
             });
         }
-
-        this.susceptibleNumberText = $(wrapperElement).find("#susceptibleNumber");
-        this.infectedNumberText = $(wrapperElement).find("#infectedNumber");
-        this.recoveredNumberText = $(wrapperElement).find("#recoveredNumber");
-        this.deceasedNumberText = $(wrapperElement).find("#deceasedNumber");
 
         // Ensure methods are bound to correct "this" context.
         this.runAnimation = this.runAnimation.bind(this);
@@ -224,11 +219,6 @@ class CanvasSimulation {
                 this.ctx.drawImage(actorSprite, ...d.pos, 20, 27);
             }
         }
-
-        this.susceptibleNumberText.text(this.simulation.totals.susceptible);
-        this.infectedNumberText.text(this.simulation.totals.infected);
-        this.recoveredNumberText.text(this.simulation.totals.recovered);
-        this.deceasedNumberText.text(this.simulation.totals.deceased);
     }
     
     tick(){
@@ -346,9 +336,7 @@ class CanvasSimulation {
         if (!this.running) { return; }
         this.animationFrame = requestAnimationFrame(this.runAnimation);
 
-        // The simulation.tick method advances the simulation one tick
         this.tick();
-
         this.draw();
     }
 
@@ -407,6 +395,47 @@ class CanvasSimulation {
 }
 
 /**
+ * Extends the base animation to also collect and draw stats.
+ */
+class CanvasSimulationWithStats extends CanvasSimulation {
+
+    constructor(wrapperElement, canvas, simulation, opts, hooks) {
+        super(wrapperElement, canvas, simulation, opts, hooks);
+
+        // Set up stat containers
+        this.susceptibleNumberText = $(wrapperElement).find("#susceptibleNumber");
+        this.infectedNumberText = $(wrapperElement).find("#infectedNumber");
+        this.recoveredNumberText = $(wrapperElement).find("#recoveredNumber");
+        this.deceasedNumberText = $(wrapperElement).find("#deceasedNumber");
+
+        this.areaGraphElement = $(wrapperElement).find("#Simulation1-AreaGraph")[0];
+        if (this.areaGraphElement) {
+            this.areaGraph = new AreaGraph(this.areaGraphElement);
+            this.areaGraph.init();
+        }
+    }
+
+    tick() {
+        super.tick();
+
+        this.susceptibleNumberText.text(this.simulation.totals.susceptible);
+        this.infectedNumberText.text(this.simulation.totals.infected);
+        this.recoveredNumberText.text(this.simulation.totals.recovered);
+        this.deceasedNumberText.text(this.simulation.totals.deceased);
+
+        // Re-draw the line graph on 1/10th day intervals
+        if (this.areaGraph) {
+            this.areaGraph.draw(
+                Math.floor(this.simulation.daysElapsed * 10),
+                this.simulation.totals,
+                this.simulation.simulationParameters.populationSize
+            );
+        }
+    }
+
+}
+
+/**
  * Creates a new instance of CanvasSimulation and sets up tha canvas.
  * @param {DOM} canvas - A canvas DOM node which will render the data.
  * @param {Object} simulationOptions - A selection of initial options to use.
@@ -416,7 +445,7 @@ class CanvasSimulation {
 const simulationFactory = (element, canvas, simulationOptions, options, hooks) => {
     const parameters = new SimulationParameters(simulationOptions);
     const simulation = new Simulation(parameters);
-    const visualization = new CanvasSimulation(
+    const visualization = new CanvasSimulationWithStats(
         element,
         canvas,
         simulation,
