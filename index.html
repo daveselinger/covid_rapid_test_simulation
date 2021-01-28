@@ -146,23 +146,32 @@
 
             <h2>Still need more?</h2>
             <p>
-            Here, try the same simulation above using thousands of people. Below is a robust statistical simulation we built that imitates the same bouncy balls above, but using thousands and thousands of people -- you'll see that in every
+            Below you can try the same simulation above using thousands of people. Below is a robust statistical simulation we built that imitates the same bouncy balls above, but using thousands and thousands of people -- you'll see that in every
             case, massive scale rapid testing crushes the pandemic quickly and conclusively. And all this with a higher sensitivity to our American freedoms, at lower cost, and much, much (MUCH!) faster.
-
+            </p>
+            <p>
+                Some things to try:
+                <ul>
+                    <li>Change the % of population testing to 0</li>
+                    <li>Change the % of population testing to 100</li>
+                    <li>Change the frequency of tests to daily</li>
+                    <li>Change the frequency of tests to 14 days</li>
+                </ul>
             </p>
 
 
             <div id=base_form style="width: 100%; height: 100%">
                 <canvas id="line_chart"></canvas>
-               Rapid Testing Parameters <br />
+               Core Model Parameters <br />
+               Population <input id=population_size type=text value=10000 /><br/>
+               Initial Infected Pct <input type=text id=initial_infected value=0.03 /><br/>
+            
                Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
                Percent of population testing <input type=text id=testing_rate value=0.6 /><br/>
                <input id="testing_rate_slider" type="range" min="0" max="100" step="1"  style="display:none">
             
                <div id="advancedParameters" style="display:none" >
                <br>Advance Parameters<br>
-               Population <input id=population_size type=text value=10000 /><br/>
-               Initial Infected Pct <input type=text id=initial_infected value=0.004 /><br/>
                Self-isolating symptomatic (with or without test) <input type=text id=self_isolation_rate value=0.1><br />
                Self-isolating days  <input type=text id=positive_test_isolation_interval value=14><br />
                Daily interactions (avg) <input type=text id=num_interactions value=2.05><br />
@@ -184,6 +193,14 @@
                 <button id="advancedParametersButton">Toggle Advanced</button>
                <button id="run_simulation">Run Simulation</button>
             </div>
+
+            <h2>OK you got me!!! What can we do about this?</h2>
+            <p>
+                Join Dr. Mina, a Harvard professor spearheading the effort for rapid tests.
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/L-RuvUkcyJI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                Learn more on his website: <a href="http://www.rapidtests.org">RapidTests.org</a>
+            </p>
+
         </div>
     </div>
 
