@@ -17,6 +17,7 @@
 }
 
 .horizontal-graph {
+    background: #f7f7f7;
     display: block;
     margin: 36px auto;
     width: 1000px;

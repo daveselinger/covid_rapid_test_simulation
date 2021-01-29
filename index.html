@@ -41,13 +41,49 @@
 </head>
 <body>
     <div class="container-md">
+        <div class="block sm">
+            <h1>More Testing = More Better</h1>
+            <p class="lead">Rapid testing can end the pandemic in just weeks.</p>
+            <p>Here's how: Test 50%+ of the population twice a week. Seriously. We can do this at a fraction of the cost of the current plans, it has an almost unlimited supply chain (vs. vaccine for example) requiring
+                much less expertise &mdash; e.g., the tests can be easily self-administered without needing a physician.
+            </p>
+        </div>
 
         <div class="block sm">
-            <h1>COVID Visual Simulation</h1>
-            <p>This is a visual simulation to communicate the spread of COVID among a population, and the power of isolation in controlling spread.</p>
+            <h1>See for yourself</h1>
+            <p>Below is an animation showing how rapid testing can quickly and easily contain an outbreak by testing 60% of the population every 3 days. Each dot represents a person, and when they're red and infected
+                they can bump into a blue uninfected person (susceptible) and infect them.
+                Every 3 days, 60% of the population administers a self test and even if they're not symptomatic, they can isolate and stop the spread. Go ahead click the <em>Start</em> button and play around with the numbers.
+            </p>
+            <p></p>
         </div>
 
         <div id="Simulation1">
+            <div class="block sm">
+                <div class="controls row d-flex align-items-center">
+                    <div class="col">
+                        <strong>Population:</strong>
+                        <input type="number" name="populationSize" size="6" value="200" min="50" max="2000" /><br/>
+                        <strong>Infected:</strong>
+                        <input type="number" name="startingInfectionRate" size="6" value="3" min="1" max="99" />%<br/>
+                        <strong>Rapid testing interval (days):</strong>
+                        <input type="number" name="testingInterval" size="6" value="3" min="1" max="200" /><br/>
+                        <strong>Population testing:</strong>
+                        <input type="number" name="testingRate" size="6" value="60" min="0" max="99" />%<br/>
+                    </div>
+                    <div class="col text-end">
+                        <button class="btn btn-outline-secondary btn-toggleActor"> Dots</button>
+                        <button class="btn btn-outline-secondary btn-pause"><i class="i cil-media-pause"></i> Pause</button>
+                        <button class="btn btn-outline-secondary btn-reset"><i class="i cil-reload"></i> Reset</button>
+                        <button class="btn btn-primary btn-start"><i class="i cil-media-play"></i> Start</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block">
+                <div id="Simulation1-Graphic" class="simulation"></div>
+            </div>
+
             <div class="row block sm">
                 <div class="col-6">
                     <dl class="stats">
@@ -61,35 +97,123 @@
                 <div class="col-6 d-flex">
                     <img src="images/color_key_plain.png" class="align-self-center" style="width: 100%" alt="Color Key" />
                 </div>
-            </div>
-            <div class="block">
-                <div id="Simulation1-Graphic" class="simulation"></div>
-            </div>
-            <div class="block sm">
-                <div class="controls row d-flex align-items-center">
-                    <div class="col">
-                        <strong>Population:</strong>
-                        <input type="number" name="populationSize" size="6" value="200" min="50" max="2000" /><br/>
-                        <strong>Infected:</strong>
-                        <input type="number" name="startingInfectionRate" size="6" value="5" min="1" max="99" />%<br/>
-                        <strong>Rapid testing interval (days):</strong>
-                        <input type="number" name="testingInterval" size="6" value="3" min="1" max="200" /><br/>
-                        <strong>Population testing:</strong>
-                        <input type="number" name="testingRate" size="6" value="50" min="0" max="99" />%<br/>
-                    </div>
-                    <div class="col text-end">
-                        <button class="btn btn-outline-secondary btn-toggleActor"> Dots</button>
-                        <button class="btn btn-outline-secondary btn-pause"><i class="i cil-media-pause"></i> Pause</button>
-                        <button class="btn btn-outline-secondary btn-reset"><i class="i cil-reload"></i> Reset</button>
-                        <button class="btn btn-primary btn-start"><i class="i cil-media-play"></i> Start</button>
-                    </div>
-                </div>
-            </div>
+            </div> 
             <div class="block">
                 <div id="Simulation1-AreaGraph" class="horizontal-graph"></div>
             </div>
         </div>
 
+        <div class="block sm">
+
+            <h2>What is Rapid Testing?</h2>
+            <p>Rapid testing uses a self-administerable paper strip to quickly (usually in under 15 minutes) and cheaply (&lt;$15 cost) identify positive cases of COVID-19 &mdash; in 
+                time to act and prevent further spread. 
+            </p>
+            <p>
+                Similar to an at-home pregnancy test, rapid tests are easy to use and aren't designed to be the final diagnosis of COVID (or pregnancy), but are 
+                meant to be privately administered in a way that you can quickly tell "Should I change my behavior/call my doctor?" and you can do so quickly and easily.
+            </p>
+            <div class="text-center">
+                <figure class="figure py-4">
+                    <img
+                        src="https://www.reviewjournal.com/wp-content/uploads/2020/11/14451326_web1_abbottlabrapidtest-1.jpg"
+                        alt="Abbot rapid COVID test"
+                        class="figure-img img-fluid rounded" 
+                        width="50%"
+                        height="50%"
+                    >
+                    <figcaption class="figure-caption text-left">Abbot's rapid test, for example</figcaption>
+                </figure>
+            </div>
+            <p>
+                Rapid tests can change the course of the COVID-19 pandemic and may be the most amazing tool for <strong>identifying</strong>, <strong>containing</strong> and <strong>preventing</strong> future outbreaks. (Even 
+                a potential COVID-19 variant outbreak) due to their low-cost and massive production scale. We could literally be testing 50%+ of the entire US population twice a week. And we could
+                do it at a fraction of the cost of our most recent aid package with better results.
+            </p>
+            <h2>What is the difference between rapid tests and lab tests?</h2>
+            <p>
+                There are 3 major differences between a rapid test (technically called an "Antigen test") and standard lab tests (called "PCR tests"):
+                <ul>
+                    <li><b>Cost</b></li> Rapid tests cost &lt; $15 to administer due to their low complexity and can be self-administered.
+                    <li><b>Quick Results</b></li> Unlike a PCR test that can take up to 48 hours or more for a result, rapid antigen tests provide results in 15 minutes. This means they 
+                    are practical for screening people in transactional environments: sports events, retail stores, workplaces, schools, heck even concerts.
+                    <li><b>Detectability</b></li> Antigen tests use a different methodology to identify COVID-19, which means they do not detect 100% of the same cases as a PCR test. This has
+                    caused some confusion, but here's what you need to know: <b>Rapid tests detect almost 100% of the same infectous period of a patient as PCR tests.</b>
+                </ul>
+                <img src="https://images.squarespace-cdn.com/content/v1/5fdab36b376e906e04015903/1609635150143-2RGHOBZNKZMUWGA374AX/ke17ZwdGBToddI8pDm48kMr7cO87uK4i5FGmPfgnAmJ7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z4YTzHvnKhyp6Da-NYroOW3ZGjoBKy3azqku80C789l0tLQ7Yw5rvbjD09fusQ6zruw_237OMvrlo6Pc0CJdbfdeTHYj9jtBJKhNQnMMHkZZQ/new_curve.png?format=1000w">
+                <caption>Reference: <a href="http://www.rapidtests.org">rapidtests.org</a></caption>
+            </p>
+            <h2>What are the advantages of rapid tests?</h2>
+            <p>
+                <ul>
+                    <li><b>Privacy</b></li>  Because rapid tests can be provided to people to adminster in the privacy of their own homes, the pushback of invasion of privacy, "big-brotherishness" etc. is 
+                    reduced.
+                    <li><b>My body</b></li> For all the virtues of the COVID vaccine, let's face it, millions of Americans are hesitant if not outright refusing to take the vaccine. 
+                    <li><b>Better together</b></li> Rapid tests are an effective and low-cost addition to all of the other public health policies in place--it can be combined with the current vaccine strategies and will only accelerate 
+                all efforts. Rapid testing reaches its highest level of effectiveness at 60%+ of a population testing at least twice a week.</b>
+                </ul>
+            </p>
+
+            <h2>Still need more?</h2>
+            <p>
+            Below you can try the same simulation above using thousands of people. Below is a robust statistical simulation we built that imitates the same bouncy balls above, but using thousands and thousands of people -- you'll see that in every
+            case, massive scale rapid testing crushes the pandemic quickly and conclusively. And all this with a higher sensitivity to our American freedoms, at lower cost, and much, much (MUCH!) faster.
+            </p>
+            <p>
+                Some things to try:
+                <ul>
+                    <li>Change the % of population testing to 0</li>
+                    <li>Change the % of population testing to 100</li>
+                    <li>Change the frequency of tests to daily</li>
+                    <li>Change the frequency of tests to 14 days</li>
+                </ul>
+            </p>
+
+
+            <div id=base_form style="width: 100%; height: 100%">
+                <canvas id="line_chart"></canvas>
+               <b>Simulation Parameters</b> <br />
+               Population <input id=population_size type=text value=10000 />(We've tested up to a million and the results are consistent!)<br/> 
+               Initial Infected Pct <input type=text id=initial_infected value=0.03 /><br/>
+            
+               Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
+               Percent of population testing <input type=text id=testing_rate value=0.6 /><br/>
+               <input id="testing_rate_slider" type="range" min="0" max="100" step="1"  style="display:none">
+            
+               <div id="advancedParameters" style="display:none" >
+               <br>Advance Parameters<br>
+               Self-isolating symptomatic (with or without test) <input type=text id=self_isolation_rate value=0.1><br />
+               Self-isolating days  <input type=text id=positive_test_isolation_interval value=14><br />
+               Daily interactions (avg) <input type=text id=num_interactions value=2.05><br />
+               Daily interactions (STD) <input type=text id=num_interactions_std value=0.02><br />
+            
+               Rapid Testing Parameters <br />
+               False Positive percent <input type=text id=false_positive value=0.01 /><br/>
+               False Negative percent <input type=text id=false_negative value="0.02" /><br/>
+            
+               Disease Parameters <br />
+               Days to Contagious <input type=text id=days_to_contagious value=3 /><br/>
+               Days to Detectable <input type=text id=days_to_detectable value=3.5 /><br/>
+               Days to Symptoms <input type=text id=days_to_symptoms value=5.5 /><br/>
+               Days to Recovery <input type=text id=days_to_recovery value=14.0 /><br/>
+               Mortality Rate <input type=text id=mortality_rate value=0.01 /><br/>
+               Asymptomatic Rate <input type=text id=asymptomatic_rate value=0.2 /><br/>
+               Recovered Resistance <input type=text id=recovered_resistance value=0.98 /><br/>
+                </div>
+                <button id="advancedParametersButton" class="btn btn-secondary my-3">Toggle Advanced</button>
+                <button id="run_simulation" class="btn btn-primary my-3">Run Simulation</button>
+            </div>
+
+            <h2>OK you got me!!! What can we do about this?</h2>
+            <p>
+                Join Dr. Mina, a Harvard professor spearheading the effort for rapid tests.
+            </p>
+            <iframe width="100%" height="315" src="https://www.youtube.com/embed/L-RuvUkcyJI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p>
+                Learn more on his website: <a href="http://www.rapidtests.org">RapidTests.org</a>
+            </p>
+
+        </div>
     </div>
 
     <footer>
@@ -110,6 +234,9 @@
 <script src="./visuals/common.js" type="text/javascript"></script>
 <script src="./visuals/areaGraph.js" type="text/javascript"></script>
 <script src="./visuals/canvasAnimation.js" type="text/javascript"></script>
+<script src="./lib/linechart.js"></script>
+<script src="./lib/simulation_display.js"></script>
+
 <script>
     window.onload = function () {
         const parameters1 = new SimulationParameters({
@@ -141,6 +268,116 @@
         // });
         // makeCanvasAnimation('Simulation2', parameters2);
     };
+
+    document.getElementById('base_form').style.display='none';
+
+    function getFormParameters(form_name) {
+        var parameters = new SimulationParameters();
+            // Population Parameters
+            parameters.populationSize = parseInt(document.getElementById(form_name + "_" + 'population_size').value);
+            parameters.startingInfectionRate = parseFloat(document.getElementById(form_name + "_" + 'initial_infected').value);
+            parameters.positiveTestIsolationInterval = parseFloat(document.getElementById(form_name + "_" + 'positive_test_isolation_interval').value);
+            parameters.numInteractions = parseFloat(document.getElementById(form_name + "_" + 'num_interactions').value);
+            parameters.numInteractionsSTD = parseFloat(document.getElementById(form_name + "_" + 'num_interactions_std').value);
+
+            // Testing Parameters
+            parameters.testingInterval = parseFloat(document.getElementById(form_name + "_" + 'testing_interval_days').value);
+            parameters.testingRate = parseFloat(document.getElementById(form_name + "_" + 'testing_rate').value);
+            parameters.falsePositiveRate = parseFloat(document.getElementById(form_name + "_" + 'false_positive').value);
+            parameters.falseNegative = parseFloat(document.getElementById(form_name + "_" + 'false_negative').value);
+
+            // Disease Parameters
+            parameters.daysToContagious = parseFloat(document.getElementById(form_name + "_" + 'days_to_contagious').value);
+            parameters.daysToDetectable = parseFloat(document.getElementById(form_name + "_" + 'days_to_detectable').value);
+            parameters.daysToSymptoms = parseFloat(document.getElementById(form_name + "_" + 'days_to_symptoms').value);
+            parameters.daysToRecovery = parseFloat(document.getElementById(form_name + "_" + 'days_to_recovery').value);
+            parameters.mortalityRate = parseFloat(document.getElementById(form_name + "_" + 'mortality_rate').value);
+            parameters.asymptomaticRate = parseFloat(document.getElementById(form_name + "_" + 'asymptomatic_rate').value);
+            parameters.recoveredResistance = parseFloat(document.getElementById(form_name + "_" + 'recovered_resistance').value);
+
+            // console.log(parameters.populationSize);
+            // console.log(parameters.startingInfectionRate);
+            // console.log(parameters.testingInterval);
+            // console.log(parameters.testingRate);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+            // console.log(parameters.populationSize);
+        return parameters;
+    }
+    function toggleElement(name) {
+        var x = document.getElementById( name );
+        if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+    }
+    function setupForm(form_name) {
+        base_form = base_form;
+        new_form = base_form.cloneNode(true); ;
+        new_form.setAttribute('id', form_name + "_form");
+        child_elements = new_form.children;
+        function iterateRename(child_elements) {
+            for (cur_element of child_elements) {
+                if (cur_element.id == null || cur_element.id == "") {
+                    continue;
+                }
+                cur_element.setAttribute('id', form_name + "_" + cur_element.id );
+                if(cur_element.children.length>0) {
+                    iterateRename(cur_element.children)
+                }
+            }
+        }
+        iterateRename(child_elements);
+
+        new_form.style.display = 'block';
+
+        base_form.parentNode.insertBefore(new_form, base_form.nextSibling);
+
+        line_chart_element = document.getElementById(form_name + "_line_chart");        
+
+        let simulation_display;
+
+        document.getElementById(form_name + '_run_simulation').addEventListener('click', function() {
+            parameters = getFormParameters(form_name);
+            line_chart_element = document.getElementById(form_name + "_line_chart");
+            simulation_display=runSimulation(simulation_display,line_chart_element,parameters);
+        });
+        document.getElementById(form_name + '_advancedParametersButton').addEventListener('click', function() {
+            toggleElement(form_name + "_advancedParameters");
+        });
+        document.getElementById(form_name + '_testing_rate_slider').addEventListener('change', function() {
+            testingRate = parseFloat(document.getElementById(form_name + "_" + 'testing_rate_slider').value)/100.0;
+            document.getElementById(form_name + "_" + 'testing_rate').value=testingRate;
+            parameters = getFormParameters(form_name);
+            line_chart_element = document.getElementById(form_name + "_line_chart");
+            console.log("Fast run simulation test.");
+            simulation_display=runSimulation(simulation_display,line_chart_element,parameters,0);
+        });
+    }
+
+    setupForm('boop');
+
+    function runSimulation(simulation_display,line_chart_element, parameters,timeout=5) {
+        if (simulation_display) {
+            old_simulation_display = simulation_display;
+            old_simulation_display.stop();
+
+            simulation_display = new SimulationDisplay(parameters, 500);
+            simulation_display.getChart(old_simulation_display);
+            simulation_display.resetData();
+            simulation_display.start(timeout);
+        } else {
+            simulation_display = new SimulationDisplay(parameters, 500);
+            simulation_display.initChart (line_chart_element);
+            simulation_display.start(timeout);
+        }
+        return simulation_display;
+    }
+
 </script>
 
 </html>

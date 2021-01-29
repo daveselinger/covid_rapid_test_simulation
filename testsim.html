@@ -7,7 +7,10 @@
 
 <div id=base_form style="width: 100%; height: 100%">
     <canvas id="line_chart"></canvas>
-   Rapid Testing Parameters <br />
+   Core Model Parameters <br />
+   Population <input id=population_size type=text value=10000 /><br/>
+   Initial Infected Pct <input type=text id=initial_infected value=0.03 /><br/>
+
    Testing interval (in days) <input type=text id=testing_interval_days value=3 /><br/>
    Percent of population testing <input type=text id=testing_rate value=0.6 /><br/>
    PCR Testing Rate   <input type=text id=testing_rate_pcr value=0.003 /><br/>
@@ -17,8 +20,6 @@
 
    <div id="advancedParameters" style="display:none" >
    <br>Advance Parameters<br>
-   Population <input id=population_size type=text value=10000 /><br/>
-   Initial Infected Pct <input type=text id=initial_infected value=0.004 /><br/>
    Self-isolating symptomatic (with or without test) <input type=text id=self_isolation_rate value=0.1><br />
    Self-isolating days  <input type=text id=positive_test_isolation_interval value=14><br />
    Daily interactions (avg) <input type=text id=num_interactions value=2.05><br />
@@ -156,9 +157,7 @@
     }
 
     setupForm('boop');
-    setupForm('boop_badoop');
-
-
+    //setupForm('boop_badoop');
 
     function runSimulation(simulation_display,line_chart_element, parameters,timeout=5) {
         if (simulation_display) {
