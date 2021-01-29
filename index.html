@@ -43,9 +43,9 @@
     <div class="container-md">
         <div class="block sm">
             <h1>More Testing = More Better</h1>
-            <p>Rapid testing can end the pandemic in just weeks.</p>
+            <p class="lead">Rapid testing can end the pandemic in just weeks.</p>
             <p>Here's how: Test 50%+ of the population twice a week. Seriously. We can do this at a fraction of the cost of the current plans, it has an almost unlimited supply chain (vs. vaccine for example) requiring
-                much less expertise -- e.g., the tests can be easily self-administered without needing a physician.
+                much less expertise &mdash; e.g., the tests can be easily self-administered without needing a physician.
             </p>
         </div>
 
@@ -53,7 +53,7 @@
             <h1>See for yourself</h1>
             <p>Below is an animation showing how rapid testing can quickly and easily contain an outbreak by testing 60% of the population every 3 days. Each dot represents a person, and when they're red and infected
                 they can bump into a blue uninfected person (susceptible) and infect them.
-                Every 3 days, 60% of the population administers a self test and even if they're not symptomatic, they can isolate and stop the spread. Go ahead click the play button and play around with the numbers.
+                Every 3 days, 60% of the population administers a self test and even if they're not symptomatic, they can isolate and stop the spread. Go ahead click the <em>Start</em> button and play around with the numbers.
             </p>
             <p></p>
         </div>
@@ -106,18 +106,28 @@
         <div class="block sm">
 
             <h2>What is Rapid Testing?</h2>
-            <p>Rapid testing uses a self-administerable paper strip to quickly (usually in under 15 minutes) and cheaply (&lt;$15 cost) identify positive cases of COVID-in in 
+            <p>Rapid testing uses a self-administerable paper strip to quickly (usually in under 15 minutes) and cheaply (&lt;$15 cost) identify positive cases of COVID-19 &mdash; in 
                 time to act and prevent further spread. 
             </p>
             <p>
                 Similar to an at-home pregnancy test, rapid tests are easy to use and aren't designed to be the final diagnosis of COVID (or pregnancy), but are 
                 meant to be privately administered in a way that you can quickly tell "Should I change my behavior/call my doctor?" and you can do so quickly and easily.
-                <img src="https://www.reviewjournal.com/wp-content/uploads/2020/11/14451326_web1_abbottlabrapidtest-1.jpg" width="50%" height="50%">
-                <caption>Abbot's rapid test, for example</caption>
             </p>
+            <div class="text-center">
+                <figure class="figure py-4">
+                    <img
+                        src="https://www.reviewjournal.com/wp-content/uploads/2020/11/14451326_web1_abbottlabrapidtest-1.jpg"
+                        alt="Abbot rapid COVID test"
+                        class="figure-img img-fluid rounded" 
+                        width="50%"
+                        height="50%"
+                    >
+                    <figcaption class="figure-caption text-left">Abbot's rapid test, for example</figcaption>
+                </figure>
+            </div>
             <p>
-                Rapid tests can change the course of the COVID-19 pandemic and may be the most amazing tool for identifying, containing and preventing future outbreaks. (Even 
-                a potential COVID-19 Variant outbreak) due to their low-cost and massive production scale. We could literally be testing 50%+ of the entire US population twice a week. And we could
+                Rapid tests can change the course of the COVID-19 pandemic and may be the most amazing tool for <strong>identifying</strong>, <strong>containing</strong> and <strong>preventing</strong> future outbreaks. (Even 
+                a potential COVID-19 variant outbreak) due to their low-cost and massive production scale. We could literally be testing 50%+ of the entire US population twice a week. And we could
                 do it at a fraction of the cost of our most recent aid package with better results.
             </p>
             <h2>What is the difference between rapid tests and lab tests?</h2>
@@ -190,14 +200,16 @@
                Asymptomatic Rate <input type=text id=asymptomatic_rate value=0.2 /><br/>
                Recovered Resistance <input type=text id=recovered_resistance value=0.98 /><br/>
                 </div>
-                <button id="advancedParametersButton">Toggle Advanced</button>
-               <button id="run_simulation">Run Simulation</button>
+                <button id="advancedParametersButton" class="btn btn-secondary my-3">Toggle Advanced</button>
+                <button id="run_simulation" class="btn btn-primary my-3">Run Simulation</button>
             </div>
 
             <h2>OK you got me!!! What can we do about this?</h2>
             <p>
                 Join Dr. Mina, a Harvard professor spearheading the effort for rapid tests.
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/L-RuvUkcyJI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </p>
+            <iframe width="100%" height="315" src="https://www.youtube.com/embed/L-RuvUkcyJI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p>
                 Learn more on his website: <a href="http://www.rapidtests.org">RapidTests.org</a>
             </p>
 
