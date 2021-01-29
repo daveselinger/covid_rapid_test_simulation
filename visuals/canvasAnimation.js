@@ -150,11 +150,15 @@ class CanvasSimulation {
         const infection = actor.myInfection;
         // If they're not symptomatic yet, find out what % they are in the "daysToSymptomatic"
         if (!actor.isSymptomatic) {
-            return COLOR_SPECTRUM.EXPOSED[Math.floor((infection.infectedTime / infection.daysToSymptomatic) * 20)];
+            let colorIndex = Math.floor((infection.infectedTime / infection.daysToSymptomatic) * 20);
+            if (colorIndex >= COLOR_SPECTRUM.EXPOSED.length) { colorIndex = COLOR_SPECTRUM.EXPOSED.length - 1; }
+            return COLOR_SPECTRUM.EXPOSED[colorIndex];
         }
-        // If they're symptomatic, 
+        // If they're symptomatic, find how long they've been in the symptomatic range as %.
         if (actor.isSymptomatic) {
-            return COLOR_SPECTRUM.INFECTIOUS[Math.floor(((infection.infectedTime - infection.daysToSymptomatic) / infection.durationDaysOfAntigenDetection) * 20)];
+            let colorIndex = Math.floor(((infection.infectedTime - infection.daysToSymptomatic) / infection.durationDaysOfAntigenDetection) * 20);
+            if (colorIndex >= COLOR_SPECTRUM.INFECTIOUS.length) { colorIndex = COLOR_SPECTRUM.INFECTIOUS.length - 1; }
+            return COLOR_SPECTRUM.INFECTIOUS[colorIndex];
         }
 
         // Fallback? Should we ever get here?
