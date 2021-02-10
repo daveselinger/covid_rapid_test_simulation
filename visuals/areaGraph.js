@@ -114,7 +114,7 @@ class AreaGraph {
 
         // Infected
         const infected = this.innerHeight * (totals.infected / populationSize);
-        this.line(x, offset, x, offset + infected, this.lineWidth + 1, COLORS.YELLOW);
+        this.line(x, offset, x, offset + infected, this.lineWidth + 1, COLORS.RED);
         offset += infected;
 
         // Deceased
