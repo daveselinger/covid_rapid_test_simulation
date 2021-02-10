@@ -40,6 +40,9 @@ const COLOR_SPECTRUM = {
         '#8bac8d', // 5
         '#a9ba7d', // 6
         '#c6c56f', // 7
+    ],
+    INFECTIOUS: [
+        '#c6c56f', // 7
         '#dfce61', // 8
         '#f0d158', // 9
         '#f7d051', // 10
@@ -52,9 +55,7 @@ const COLOR_SPECTRUM = {
         '#f76b47', // 17
         '#f75d47', // 18
         '#f65247', // 19
-        '#f45147'  // 20
-    ],
-    INFECTIOUS: [
+        '#f45147', // 20
         '#f34f47', // 1
         '#ec4c47', // 2
         '#df4f4b', // 3
