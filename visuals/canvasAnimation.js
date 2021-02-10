@@ -148,19 +148,19 @@ class CanvasSimulation {
         
         // Actor is within the disease progression, generate spectrum of colors
         const infection = actor.myInfection;
-        // If they're not symptomatic yet, find out what % they are in the "daysToSymptomatic"
-        if (!actor.isSymptomatic) {
-            let colorIndex = Math.floor((infection.infectedTime / infection.daysToSymptomatic) * 20);
+
+        // If they're not Contagious yet, find out what % they are in the "daysToContagious"
+        if (infection.duration() < infection.daysToContagious) {
+            let colorIndex = Math.floor((infection.duration() / infection.daysToContagious) * COLOR_SPECTRUM.EXPOSED.length);
             if (colorIndex >= COLOR_SPECTRUM.EXPOSED.length) { colorIndex = COLOR_SPECTRUM.EXPOSED.length - 1; }
             return COLOR_SPECTRUM.EXPOSED[colorIndex];
-        }
-        // If they're symptomatic, find how long they've been in the symptomatic range as %.
-        if (actor.isSymptomatic) {
-            let colorIndex = Math.floor(((infection.infectedTime - infection.daysToSymptomatic) / infection.durationDaysOfAntigenDetection) * 20);
+        } else {
+            let colorIndex = Math.floor(((infection.duration() - infection.daysToContagious) / 
+            (infection.daysToNotContagious-infection.daysToContagious)) * COLOR_SPECTRUM.INFECTIOUS.length);
             if (colorIndex >= COLOR_SPECTRUM.INFECTIOUS.length) { colorIndex = COLOR_SPECTRUM.INFECTIOUS.length - 1; }
             return COLOR_SPECTRUM.INFECTIOUS[colorIndex];
         }
-
+        console.log("F");
         // Fallback? Should we ever get here?
         return COLORS.BLUE; 
     }
