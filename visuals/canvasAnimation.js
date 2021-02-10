@@ -160,7 +160,7 @@ class CanvasSimulation {
             if (colorIndex >= COLOR_SPECTRUM.INFECTIOUS.length) { colorIndex = COLOR_SPECTRUM.INFECTIOUS.length - 1; }
             return COLOR_SPECTRUM.INFECTIOUS[colorIndex];
         }
-        console.log("F");
+
         // Fallback? Should we ever get here?
         return COLORS.BLUE; 
     }
