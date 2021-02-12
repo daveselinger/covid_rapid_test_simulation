@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<script src="./lib/simulation.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.bundle.min.js"></script>
+<script src="./lib/linechart.js"></script>
+<script src="./lib/simulation_display.js"></script>
+
+<div id=output style="width: 100%; height: 100%">
+</div>
+
+NOTE THE LAST 2 ARE EXPECTED TO FAIL
+JUST ENSURE THE MEAN IS THE SAME -- the STD will be truncated due to the non-normalcy of a curve using real numbers (can't be < 0 for example)
+
+<script>
+    console.log("Start");
+    output_text = "Beginning Unit tests...\n";
+    output_text = output_text + "...\n";
+
+    function getGaussian(mean_in, std_in) {
+        sum = 0;
+        sum_of_squares = 0;
+        count = 1000000
+        for (i = 0; i < count; i++) {
+            rand = gaussianRandom(mean_in, std_in);
+            sum += rand;
+            sum_of_squares += rand * rand;
+        }
+        mean_out = sum / count;
+        std_out = Math.sqrt(sum_of_squares / count - mean_out * mean_out);
+        passed = ( Math.abs (mean_in/mean_out - 1) < 0.01) && (  Math.abs(std_in/std_out - 1) < 0.01)
+        output = "PASSED";
+        if (!passed) {
+            output = "FAILED";
+        }
+        return output + "; Mean:" + mean_out + " (" + mean_in + "); std:" + std_out + "(" + std_in + ")";
+    }
+
+    output_text = output_text + getGaussian (1000, 100) + "\n";
+    output_text = output_text + getGaussian (100, 10) + "\n";
+    output_text = output_text + getGaussian (10, 1) + "\n";
+    output_text = output_text + getGaussian (500, 200) + "\n";
+    output_text = output_text + getGaussian (10, 7) + "\n";
+
+    document.getElementById('output').innerText=output_text;
+
+</script>
+</html>
+
+  
