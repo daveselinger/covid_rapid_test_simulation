@@ -4,6 +4,10 @@
 
 No build system required, simply open [index.html](./index.html) in your preferred Browser.
 
+## Check it out
+
+Deployed to [MoreTestingMoreBetter.org](http://www.moretestingmorebetter.org).
+
 ## External Dependencies
 
 1. [jQuery](https://jquery.com)
